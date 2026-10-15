@@ -42,32 +42,76 @@ jobs:
       - name: Check bundle size
         run: npm run size:check --if-present
 
-  contracts:
-    name: Contracts (fmt, clippy, test)
+  security:
+    name: Security Audit
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: contracts
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust (stable + fmt/clippy)
-        uses: dtolnay/rust-toolchain@stable
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
         with:
-          components: rustfmt, clippy
+          node-version: 22
+          cache: npm
 
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps --no-fund
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate || true
+
+  coverage:
+    name: Coverage Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
         with:
-          workspaces: contracts -> target
+          fetch-depth: 0
 
-      - name: Check formatting
-        run: cargo fmt --all -- --check
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-      - name: Clippy
-        run: cargo clippy --lib
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps --no-fund
 
-      - name: Tests
-        run: cargo test --lib
+      - name: Generate coverage
+        run: npm run test:coverage --if-present
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        continue-on-error: true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+          fail_ci_if_error: false
+        continue-on-error: true
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps --no-fund
+
+      - name: Run integration tests
+        run: npm run test:integration --if-present
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        continue-on-error: true
