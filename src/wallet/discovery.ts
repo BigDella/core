@@ -165,7 +165,7 @@ export async function discoverWallet(
       );
     }
 
-    const response = await fetchFn(url);
+    const response = await fetchFn(url, {});
     const text = await response.text();
 
     // Parse ACCOUNTS = ["G..."] format

@@ -68,7 +68,7 @@ export async function resolveFederatedAddress(
         "%2A",
       );
       const url = `${protocol}://${parsed.domain}/.well-known/stellar-federation?stellar_address=${encodedAddress}`;
-      const response = await options.fetchFn(url);
+      const response = await options.fetchFn(url, {});
       const data = (await response.json()) as any;
 
       if (data.stellar_address || data.account_id) {
