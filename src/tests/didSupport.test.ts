@@ -16,6 +16,7 @@ import {
   resolveDID,
   linkAccountToDID,
   verifyDIDOwnership,
+  clearDIDLinks,
   STELLAR_DID_METHOD,
 } from "../integration/didSupport";
 import type {
@@ -514,5 +515,40 @@ describe("STELLAR_DID_METHOD", () => {
     if (result.status !== "ok") return;
 
     expect(result.data.did.startsWith(STELLAR_DID_METHOD + ":")).toBe(true);
+  });
+}); // ═════════════════════════════════════════════════════════════════════════════
+// clearDIDLinks
+// ═════════════════════════════════════════════════════════════════════════════
+
+describe("clearDIDLinks", () => {
+  it("clears all stored DID links without error", async () => {
+    // First create some links
+    const linkResult1 = await linkAccountToDID(TEST_KEY, TEST_DID);
+    expect(linkResult1.status).toBe("ok");
+
+    const linkResult2 = await linkAccountToDID(OTHER_KEY, OTHER_DID);
+    expect(linkResult2.status).toBe("ok");
+
+    // Then clear them
+    expect(() => {
+      clearDIDLinks();
+    }).not.toThrow();
+  });
+
+  it("can be called multiple times without side effects", async () => {
+    // First clear
+    clearDIDLinks();
+
+    // Create a link
+    const linkResult = await linkAccountToDID(TEST_KEY, TEST_DID);
+    expect(linkResult.status).toBe("ok");
+
+    // Clear again
+    clearDIDLinks();
+
+    // Another clear should not error
+    expect(() => {
+      clearDIDLinks();
+    }).not.toThrow();
   });
 });
