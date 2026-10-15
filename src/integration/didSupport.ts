@@ -152,9 +152,18 @@ export interface ResolveDIDOptions {
 export async function resolveDID(
   did: string,
   options?: ResolveDIDOptions,
-): Promise<SorokitResult<DIDData>> {
+): Promise<SorokitResult<{ publicKey: string; document: StellarDIDDocument }>> {
   const parsed = parseDID(did);
-  if (parsed.status === "error") return parsed;
+  if (parsed.status === "error") {
+    // If this is a non-stellar DID without a resolver, provide a specific error
+    if (!did.startsWith(DID_PREFIX) && !options?.resolver) {
+      return err(
+        SorokitErrorCode.INVALID_CONFIG,
+        `Cannot resolve non-stellar DID without a custom resolver; no resolver was provided`,
+      );
+    }
+    return parsed;
+  }
 
   // Try custom resolver first if provided
   if (options?.resolver) {
@@ -176,11 +185,7 @@ export async function resolveDID(
           );
         }
       }
-      return ok({
-        did,
-        publicKey: parsed.data,
-        document: resolvedDoc,
-      });
+      return ok({ publicKey: parsed.data, document: resolvedDoc });
     } catch (cause) {
       return err(
         SorokitErrorCode.NETWORK_ERROR,
@@ -201,14 +206,11 @@ export async function resolveDID(
   // Fall back to local storage or generate on-the-fly for stellar DIDs
   const stored = links.get(did);
   if (stored) {
-    return ok(stored);
+    return ok({ publicKey: stored.publicKey, document: stored.document });
   }
 
-  return ok({
-    did,
-    publicKey: parsed.data,
-    document: documentFor(did, parsed.data),
-  });
+  const document = documentFor(did, parsed.data);
+  return ok({ publicKey: parsed.data, document });
 }
 
 export interface LinkAccountToDIDOptions {
@@ -238,9 +240,9 @@ export async function linkAccountToDID(
     return resolved;
   }
 
-  // Extract public key from document
-  const documentPublicKey =
-    resolved.data.document.verificationMethod[0]?.publicKeyMultibase;
+  // Extract public key from document - resolveDID now returns { publicKey, document }
+  const { publicKey: resolvedPubKey, document } = resolved.data;
+  const documentPublicKey = document.verificationMethod[0]?.publicKeyMultibase;
   if (documentPublicKey !== publicKey) {
     return err(
       SorokitErrorCode.INVALID_CONFIG,
@@ -248,8 +250,24 @@ export async function linkAccountToDID(
     );
   }
 
-  const linked = {
-    ...resolved.data,
+  // Parse the public key from the DID
+  const parsed = parseDID(did);
+  if (parsed.status === "error") return parsed;
+
+  const linked: DIDData = {
+    did,
+    publicKey: parsed.data,
+    document: {
+      "@context": document["@context"],
+      id: document.id,
+      controller: document.controller,
+      created: document.created,
+      expires: document.expires,
+      verificationMethod: document.verificationMethod,
+      authentication: document.authentication,
+      assertionMethod: document.assertionMethod,
+      service: document.service,
+    },
     linkedAt: new Date().toISOString(),
     method: STELLAR_DID_METHOD,
   };
@@ -326,7 +344,7 @@ export async function verifyDIDOwnership(
 
   // Validate proof structure
   if (!proof || !proof.signature || typeof proof.signature !== "string") {
-    return err(SorokitErrorCode.INVALID_AUTH, "Proof must include a signature");
+    return err(SorokitErrorCode.INVALID_AUTH, "Proof is missing a signature");
   }
 
   if (proof.signature.trim() === "") {
@@ -349,11 +367,14 @@ export async function verifyDIDOwnership(
     return resolved;
   }
 
+  // resolveDID now returns { publicKey, document }
+  const { document } = resolved.data;
+
   // Generate the canonical challenge
   const canonicalChallenge = `sorokit:did-ownership:${did}:${publicKey}`;
 
   // Verify the public key is listed in the document
-  const keyFound = resolved.data.document.verificationMethod.some(
+  const keyFound = document.verificationMethod.some(
     (m) => m.publicKeyMultibase === publicKey,
   );
   if (!keyFound) {
@@ -363,7 +384,7 @@ export async function verifyDIDOwnership(
       did,
       publicKey,
       challenge: canonicalChallenge,
-      document: resolved.data.document,
+      document: document,
     });
   }
 
@@ -381,7 +402,7 @@ export async function verifyDIDOwnership(
         did,
         publicKey,
         challenge: canonicalChallenge,
-        document: resolved.data.document,
+        document: document,
       });
     } else {
       return ok({
@@ -390,7 +411,7 @@ export async function verifyDIDOwnership(
         did,
         publicKey,
         challenge: canonicalChallenge,
-        document: resolved.data.document,
+        document: document,
       });
     }
   } catch (cause) {
@@ -401,7 +422,7 @@ export async function verifyDIDOwnership(
       did,
       publicKey,
       challenge: canonicalChallenge,
-      document: resolved.data.document,
+      document: document,
     });
   }
 }

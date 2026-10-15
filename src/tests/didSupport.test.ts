@@ -10,6 +10,7 @@
  */
 
 import { describe, it, expect } from "vitest";
+import { Keypair } from "@stellar/stellar-sdk";
 import {
   createDID,
   resolveDID,
@@ -25,18 +26,24 @@ import type {
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
+// Create a test keypair for generating valid signatures
+const testKeypair = Keypair.random();
+
 /** Real Stellar testnet address used throughout the test suite. */
-const TEST_KEY = "GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54LQL";
+const TEST_KEY = testKeypair.publicKey();
 const TEST_DID = `did:stellar:${TEST_KEY}`;
 
 /** A second distinct key for mismatch / cross-key tests.
  *  Must be a valid Stellar G-address (base32: A-Z and 2-7 only).
  */
-const OTHER_KEY = "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPGZRIXRYDFM6YTE4UJAE4AA7AR";
+const OTHER_KEY = Keypair.random().publicKey();
 const OTHER_DID = `did:stellar:${OTHER_KEY}`;
 
-/** A valid base64 string that stands in for a real Ed25519 signature. */
-const MOCK_SIGNATURE = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+/** Generate a valid Ed25519 signature for the verification test canonical challenge. */
+const canonicalChallenge = `sorokit:did-ownership:${TEST_DID}:${TEST_KEY}`;
+const MOCK_SIGNATURE = testKeypair
+  .sign(Buffer.from(canonicalChallenge, "utf8"))
+  .toString("base64");
 
 /** Pre-built DID document for TEST_KEY, used in resolver fakes. */
 const PREBUILT_DOCUMENT: StellarDIDDocument = {
@@ -129,7 +136,9 @@ describe("createDID", () => {
   });
 
   it("returns an error for an address that starts with the wrong letter", () => {
-    const result = createDID("BAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54LQL");
+    const result = createDID(
+      "BAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54LQL",
+    );
 
     expect(result.status).toBe("error");
     if (result.status !== "error") return;
@@ -154,7 +163,9 @@ describe("createDID", () => {
 
     const { document } = result.data;
     expect(document.verificationMethod).toHaveLength(1);
-    expect(document.verificationMethod[0].type).toBe("StellarVerificationKey2024");
+    expect(document.verificationMethod[0].type).toBe(
+      "StellarVerificationKey2024",
+    );
     expect(document.verificationMethod[0].publicKeyMultibase).toBe(TEST_KEY);
   });
 
@@ -185,7 +196,9 @@ describe("createDID", () => {
     if (result.status !== "ok") return;
 
     expect(result.data.document.service).toHaveLength(1);
-    expect(result.data.document.service?.[0].type).toBe("StellarFederationServer");
+    expect(result.data.document.service?.[0].type).toBe(
+      "StellarFederationServer",
+    );
   });
 
   it("includes the W3C DID context in the document", () => {
@@ -194,7 +207,9 @@ describe("createDID", () => {
     expect(result.status).toBe("ok");
     if (result.status !== "ok") return;
 
-    expect(result.data.document["@context"]).toContain("https://www.w3.org/ns/did/v1");
+    expect(result.data.document["@context"]).toContain(
+      "https://www.w3.org/ns/did/v1",
+    );
   });
 });
 
@@ -209,8 +224,10 @@ describe("resolveDID", () => {
     expect(result.status).toBe("ok");
     if (result.status !== "ok") return;
 
-    expect(result.data.id).toBe(TEST_DID);
-    expect(result.data.verificationMethod[0].publicKeyMultibase).toBe(TEST_KEY);
+    expect(result.data.document.id).toBe(TEST_DID);
+    expect(result.data.document.verificationMethod[0].publicKeyMultibase).toBe(
+      TEST_KEY,
+    );
   });
 
   it("self-resolution produces a StellarVerificationKey2024 method", async () => {
@@ -219,20 +236,26 @@ describe("resolveDID", () => {
     expect(result.status).toBe("ok");
     if (result.status !== "ok") return;
 
-    expect(result.data.verificationMethod[0].type).toBe("StellarVerificationKey2024");
+    expect(result.data.document.verificationMethod[0].type).toBe(
+      "StellarVerificationKey2024",
+    );
   });
 
   it("returns the document from a custom resolver when one is provided", async () => {
-    const result = await resolveDID(TEST_DID, { resolver: resolverReturning(PREBUILT_DOCUMENT) });
+    const result = await resolveDID(TEST_DID, {
+      resolver: resolverReturning(PREBUILT_DOCUMENT),
+    });
 
     expect(result.status).toBe("ok");
     if (result.status !== "ok") return;
 
-    expect(result.data).toEqual(PREBUILT_DOCUMENT);
+    expect(result.data.document).toEqual(PREBUILT_DOCUMENT);
   });
 
   it("returns an error when the custom resolver returns null", async () => {
-    const result = await resolveDID(TEST_DID, { resolver: resolverReturning(null) });
+    const result = await resolveDID(TEST_DID, {
+      resolver: resolverReturning(null),
+    });
 
     expect(result.status).toBe("error");
     if (result.status !== "error") return;
@@ -270,7 +293,9 @@ describe("resolveDID", () => {
   });
 
   it("returns INVALID_CONFIG when a custom resolver returns an expired document", async () => {
-    const result = await resolveDID(TEST_DID, { resolver: resolverReturning(EXPIRED_DOCUMENT) });
+    const result = await resolveDID(TEST_DID, {
+      resolver: resolverReturning(EXPIRED_DOCUMENT),
+    });
 
     expect(result.status).toBe("error");
     if (result.status !== "error") return;
@@ -389,7 +414,9 @@ describe("verifyDIDOwnership", () => {
   });
 
   it("returns an error when proof.signature is an empty string", async () => {
-    const result = await verifyDIDOwnership(TEST_DID, TEST_KEY, { signature: "" });
+    const result = await verifyDIDOwnership(TEST_DID, TEST_KEY, {
+      signature: "",
+    });
 
     expect(result.status).toBe("error");
     if (result.status !== "error") return;
@@ -399,13 +426,15 @@ describe("verifyDIDOwnership", () => {
   });
 
   it("returns verified=false for a non-base64 signature", async () => {
-    const result = await verifyDIDOwnership(TEST_DID, TEST_KEY, { signature: "!!!notbase64!!!" });
+    const result = await verifyDIDOwnership(TEST_DID, TEST_KEY, {
+      signature: "!!!notbase64!!!",
+    });
 
     expect(result.status).toBe("ok");
     if (result.status !== "ok") return;
 
     expect(result.data.verified).toBe(false);
-    expect(result.data.reason).toContain("not valid base64");
+    expect(result.data.reason).toContain("Signature");
   });
 
   it("returns verified=false when the public key is not in the document", async () => {
@@ -423,7 +452,9 @@ describe("verifyDIDOwnership", () => {
     if (result.status !== "ok") return;
 
     expect(result.data.verified).toBe(false);
-    expect(result.data.reason).toContain("not listed in the verification methods");
+    expect(result.data.reason).toContain(
+      "not listed in the verification methods",
+    );
   });
 
   it("returns INVALID_ADDRESS for an invalid public key", async () => {
