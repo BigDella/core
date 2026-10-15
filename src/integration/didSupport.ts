@@ -72,18 +72,27 @@ function isValidStellarAddress(publicKey: string): boolean {
 }
 
 function parseDID(did: string): SorokitResult<string> {
-  const publicKey = did.startsWith(DID_PREFIX)
-    ? did.slice(DID_PREFIX.length)
-    : "";
+  // First check if it's a did:stellar format
+  if (did.startsWith(DID_PREFIX)) {
+    const publicKey = did.slice(DID_PREFIX.length);
+    if (!isValidStellarAddress(publicKey)) {
+      return err(
+        SorokitErrorCode.INVALID_CONFIG,
+        `Invalid did:stellar identifier: ${did}`,
+      );
+    }
+    return ok(publicKey);
+  }
 
-  if (!isValidStellarAddress(publicKey)) {
+  // For other DID formats, return a more specific error
+  if (did.startsWith("did:")) {
     return err(
       SorokitErrorCode.INVALID_CONFIG,
-      `Invalid did:stellar identifier: ${did}`,
+      `Unsupported DID format: ${did}`,
     );
   }
 
-  return ok(publicKey);
+  return err(SorokitErrorCode.INVALID_CONFIG, `Invalid DID format: ${did}`);
 }
 
 function documentFor(
@@ -143,7 +152,7 @@ export interface ResolveDIDOptions {
 export async function resolveDID(
   did: string,
   options?: ResolveDIDOptions,
-): Promise<SorokitResult<StellarDIDDocument>> {
+): Promise<SorokitResult<DIDData>> {
   const parsed = parseDID(did);
   if (parsed.status === "error") return parsed;
 
@@ -167,7 +176,11 @@ export async function resolveDID(
           );
         }
       }
-      return ok(resolvedDoc);
+      return ok({
+        did,
+        publicKey: parsed.data,
+        document: resolvedDoc,
+      });
     } catch (cause) {
       return err(
         SorokitErrorCode.NETWORK_ERROR,
@@ -188,10 +201,14 @@ export async function resolveDID(
   // Fall back to local storage or generate on-the-fly for stellar DIDs
   const stored = links.get(did);
   if (stored) {
-    return ok(stored.document);
+    return ok(stored);
   }
 
-  return ok(documentFor(did, parsed.data));
+  return ok({
+    did,
+    publicKey: parsed.data,
+    document: documentFor(did, parsed.data),
+  });
 }
 
 export interface LinkAccountToDIDOptions {
@@ -223,7 +240,7 @@ export async function linkAccountToDID(
 
   // Extract public key from document
   const documentPublicKey =
-    resolved.data.verificationMethod[0]?.publicKeyMultibase;
+    resolved.data.document.verificationMethod[0]?.publicKeyMultibase;
   if (documentPublicKey !== publicKey) {
     return err(
       SorokitErrorCode.INVALID_CONFIG,
@@ -232,9 +249,7 @@ export async function linkAccountToDID(
   }
 
   const linked = {
-    did,
-    publicKey,
-    document: resolved.data,
+    ...resolved.data,
     linkedAt: new Date().toISOString(),
     method: STELLAR_DID_METHOD,
   };
@@ -317,7 +332,7 @@ export async function verifyDIDOwnership(
   if (proof.signature.trim() === "") {
     return err(
       SorokitErrorCode.INVALID_AUTH,
-      "Proof signature is missing a signature value",
+      "Proof is missing a signature value",
     );
   }
 
@@ -338,7 +353,7 @@ export async function verifyDIDOwnership(
   const canonicalChallenge = `sorokit:did-ownership:${did}:${publicKey}`;
 
   // Verify the public key is listed in the document
-  const keyFound = resolved.data.verificationMethod.some(
+  const keyFound = resolved.data.document.verificationMethod.some(
     (m) => m.publicKeyMultibase === publicKey,
   );
   if (!keyFound) {
@@ -348,7 +363,7 @@ export async function verifyDIDOwnership(
       did,
       publicKey,
       challenge: canonicalChallenge,
-      document: resolved.data,
+      document: resolved.data.document,
     });
   }
 
@@ -366,7 +381,7 @@ export async function verifyDIDOwnership(
         did,
         publicKey,
         challenge: canonicalChallenge,
-        document: resolved.data,
+        document: resolved.data.document,
       });
     } else {
       return ok({
@@ -375,7 +390,7 @@ export async function verifyDIDOwnership(
         did,
         publicKey,
         challenge: canonicalChallenge,
-        document: resolved.data,
+        document: resolved.data.document,
       });
     }
   } catch (cause) {
@@ -386,7 +401,7 @@ export async function verifyDIDOwnership(
       did,
       publicKey,
       challenge: canonicalChallenge,
-      document: resolved.data,
+      document: resolved.data.document,
     });
   }
 }

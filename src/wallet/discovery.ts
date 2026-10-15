@@ -172,7 +172,11 @@ export async function discoverWallet(
     const accountsMatch = /ACCOUNTS\s*=\s*\[\s*"([^"]+)"\s*\]/i.exec(text);
     if (accountsMatch?.[1]) {
       const publicKey = accountsMatch[1];
-      if (typeof publicKey === "string" && /^G[A-Z2-7]{56}$/.test(publicKey)) {
+      if (
+        typeof publicKey === "string" &&
+        publicKey.length === 56 &&
+        publicKey.startsWith("G")
+      ) {
         const data: DiscoveryData = {
           address: publicKey,
           domain: normalizedDomain,

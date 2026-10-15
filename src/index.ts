@@ -37,6 +37,12 @@ export {
   loadIntegration,
   loadKeyManagement,
   loadSoroban,
+  loadModule,
+  preloadModules,
+  isModuleLoaded,
+  getLoadedModules,
+  LAZY_MODULES,
+  loadGovernance,
 } from "./lazy";
 export type {
   AnchorAsset,
