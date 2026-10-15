@@ -63,8 +63,15 @@ export async function resolveFederatedAddress(
     // If a custom fetch is provided, use it directly to fetch federation endpoint
     if (options.fetchFn) {
       const protocol = options.allowHttp ? "http" : "https";
-      const url = `${protocol}://${parsed.domain}/.well-known/stellar.toml`;
-      const response = await options.fetchFn(url);
+      const encodedAddress = `${parsed.username}*${parsed.domain}`.replace(
+        /\*/g,
+        "%2A",
+      );
+      const url = `${protocol}://${parsed.domain}/.well-known/stellar-federation?stellar_address=${encodedAddress}`;
+      const timeout = options.timeoutMs ?? 10_000;
+      const response = await options.fetchFn(url, {
+        timeout,
+      });
       const data = (await response.json()) as any;
 
       if (data.stellar_address || data.account_id) {

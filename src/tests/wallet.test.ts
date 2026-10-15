@@ -30,6 +30,7 @@ import {
   listLinkedAccounts,
   linkWallet,
   clearLinkedAccounts,
+  clearFederationAddressCache,
 } from "../wallet/discovery";
 import {
   InMemorySigningHistoryStore,
@@ -1768,6 +1769,7 @@ describe("wallet discovery (#wallet-discovery)", () => {
 
   beforeEach(() => {
     clearLinkedAccounts();
+    clearFederationAddressCache();
   });
 
   afterEach(() => {

@@ -158,7 +158,11 @@ export async function discoverWallet(
       (typeof globalThis !== "undefined" ? globalThis.fetch : undefined);
 
     if (!fetchFn) {
-      return resolved; // No fetch available, return original federation error
+      // No fetch available, return WALLET_NOT_FOUND
+      return err(
+        SorokitErrorCode.WALLET_NOT_FOUND,
+        "Unable to discover wallet: federation lookup failed and fetch is not available",
+      );
     }
 
     const response = await fetchFn(url);
@@ -180,11 +184,14 @@ export async function discoverWallet(
       }
     }
   } catch (_cause) {
-    // stellar.toml lookup failed, return federation error instead
+    // stellar.toml lookup failed, return WALLET_NOT_FOUND
   }
 
-  // Both federation and stellar.toml failed
-  return resolved;
+  // Both federation and stellar.toml failed - always return WALLET_NOT_FOUND
+  return err(
+    SorokitErrorCode.WALLET_NOT_FOUND,
+    "Unable to discover wallet: both federation and stellar.toml lookups failed",
+  );
 }
 
 /** List all accounts linked to a Stellar public key. */
@@ -283,3 +290,5 @@ export function unlinkWallet(
   else linkedAccounts.delete(publicKey);
   return ok(remaining.map((account) => ({ ...account })));
 }
+
+export { clearFederationAddressCache } from "../integration/federationResolver";

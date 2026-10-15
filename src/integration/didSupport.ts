@@ -143,7 +143,7 @@ export interface ResolveDIDOptions {
 export async function resolveDID(
   did: string,
   options?: ResolveDIDOptions,
-): Promise<SorokitResult<DIDData>> {
+): Promise<SorokitResult<StellarDIDDocument>> {
   const parsed = parseDID(did);
   if (parsed.status === "error") return parsed;
 
@@ -167,11 +167,7 @@ export async function resolveDID(
           );
         }
       }
-      return ok({
-        did,
-        publicKey: parsed.data,
-        document: resolvedDoc,
-      });
+      return ok(resolvedDoc);
     } catch (cause) {
       return err(
         SorokitErrorCode.NETWORK_ERROR,
@@ -190,13 +186,12 @@ export async function resolveDID(
   }
 
   // Fall back to local storage or generate on-the-fly for stellar DIDs
-  return ok(
-    links.get(did) ?? {
-      did,
-      publicKey: parsed.data,
-      document: documentFor(did, parsed.data),
-    },
-  );
+  const stored = links.get(did);
+  if (stored) {
+    return ok(stored.document);
+  }
+
+  return ok(documentFor(did, parsed.data));
 }
 
 export interface LinkAccountToDIDOptions {
@@ -226,15 +221,20 @@ export async function linkAccountToDID(
     return resolved;
   }
 
-  if (resolved.data.publicKey !== publicKey) {
+  // Extract public key from document
+  const documentPublicKey =
+    resolved.data.verificationMethod[0]?.publicKeyMultibase;
+  if (documentPublicKey !== publicKey) {
     return err(
       SorokitErrorCode.INVALID_CONFIG,
-      `DID public key mismatch: DID embeds ${resolved.data.publicKey} but supplied key is ${publicKey}`,
+      `DID public key mismatch: DID embeds ${documentPublicKey} but supplied key is ${publicKey}`,
     );
   }
 
   const linked = {
-    ...resolved.data,
+    did,
+    publicKey,
+    document: resolved.data,
     linkedAt: new Date().toISOString(),
     method: STELLAR_DID_METHOD,
   };
@@ -255,19 +255,62 @@ export interface VerifyDIDOwnershipResult {
   document: StellarDIDDocument;
 }
 
+// Overload signatures
+export async function verifyDIDOwnership(
+  did: string,
+  signature: string,
+): Promise<SorokitResult<boolean>>;
 export async function verifyDIDOwnership(
   did: string,
   publicKey: string,
   proof: DIDOwnershipProof,
   options?: VerifyDIDOwnershipOptions,
-): Promise<SorokitResult<VerifyDIDOwnershipResult>> {
+): Promise<SorokitResult<VerifyDIDOwnershipResult>>;
+
+// Implementation
+export async function verifyDIDOwnership(
+  did: string,
+  signatureOrPublicKey: string,
+  proof?: DIDOwnershipProof,
+  options?: VerifyDIDOwnershipOptions,
+): Promise<SorokitResult<boolean | VerifyDIDOwnershipResult>> {
+  // Check if this is the 2-argument version (simple signature verification)
+  if (proof === undefined && options === undefined) {
+    const signature = signatureOrPublicKey;
+    const parsed = parseDID(did);
+    if (parsed.status === "error") return parsed;
+
+    const publicKey = parsed.data;
+
+    if (
+      !signature ||
+      typeof signature !== "string" ||
+      signature.trim() === ""
+    ) {
+      return err(SorokitErrorCode.INVALID_AUTH, "Signature is required");
+    }
+
+    try {
+      const verified = Keypair.fromPublicKey(publicKey).verify(
+        Buffer.from(did, "utf8"),
+        Buffer.from(signature, "base64"),
+      );
+      return ok(verified);
+    } catch (_cause) {
+      return ok(false);
+    }
+  }
+
+  // 4-argument version (complex verification with proof and options)
+  const publicKey = signatureOrPublicKey;
+
   // Validate public key first using simple format validation
   if (!isValidStellarAddress(publicKey)) {
     return err(SorokitErrorCode.INVALID_ADDRESS, "Invalid Stellar public key");
   }
 
   // Validate proof structure
-  if (!proof.signature || typeof proof.signature !== "string") {
+  if (!proof || !proof.signature || typeof proof.signature !== "string") {
     return err(SorokitErrorCode.INVALID_AUTH, "Proof must include a signature");
   }
 
@@ -295,7 +338,7 @@ export async function verifyDIDOwnership(
   const canonicalChallenge = `sorokit:did-ownership:${did}:${publicKey}`;
 
   // Verify the public key is listed in the document
-  const keyFound = resolved.data.document.verificationMethod.some(
+  const keyFound = resolved.data.verificationMethod.some(
     (m) => m.publicKeyMultibase === publicKey,
   );
   if (!keyFound) {
@@ -305,7 +348,7 @@ export async function verifyDIDOwnership(
       did,
       publicKey,
       challenge: canonicalChallenge,
-      document: resolved.data.document,
+      document: resolved.data,
     });
   }
 
@@ -323,7 +366,7 @@ export async function verifyDIDOwnership(
         did,
         publicKey,
         challenge: canonicalChallenge,
-        document: resolved.data.document,
+        document: resolved.data,
       });
     } else {
       return ok({
@@ -332,7 +375,7 @@ export async function verifyDIDOwnership(
         did,
         publicKey,
         challenge: canonicalChallenge,
-        document: resolved.data.document,
+        document: resolved.data,
       });
     }
   } catch (cause) {
@@ -343,7 +386,7 @@ export async function verifyDIDOwnership(
       did,
       publicKey,
       challenge: canonicalChallenge,
-      document: resolved.data.document,
+      document: resolved.data,
     });
   }
 }

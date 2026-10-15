@@ -75,10 +75,7 @@ export function parseFederationAddress(
 
   // Validate name
   if (!name || name.length === 0) {
-    return err(
-      SorokitErrorCode.VALIDATION,
-      `Invalid federation name: ${name}`,
-    );
+    return err(SorokitErrorCode.VALIDATION, `Invalid federation name: ${name}`);
   }
 
   return ok({
@@ -88,9 +85,7 @@ export function parseFederationAddress(
   });
 }
 
-function formatFederationAddress(
-  address: FederationAddress,
-): string {
+function formatFederationAddress(address: FederationAddress): string {
   if (address.memo) {
     return `${address.name}*${address.domain}*${address.memo}`;
   }
@@ -137,7 +132,7 @@ export class FederationResolver {
 
     // Build federation URL
     const federationUrl = `https://${parsed.domain}/.well-known/stellar.toml`;
-    
+
     try {
       // Fetch stellar.toml to get federation server
       const stellarTomlResponse = await this.fetchWithTimeout(
@@ -192,10 +187,13 @@ export class FederationResolver {
 
       const resolved: ResolvedFederationAddress = {
         accountId: federationData.account_id,
-        ...(federationData.memo_type !== undefined && federationData.memo_type !== "none"
+        ...(federationData.memo_type !== undefined &&
+        federationData.memo_type !== "none"
           ? { memoType: federationData.memo_type }
           : {}),
-        ...(federationData.memo !== undefined ? { memo: federationData.memo } : {}),
+        ...(federationData.memo !== undefined
+          ? { memo: federationData.memo }
+          : {}),
         federationDomain: parsed.domain,
         originalAddress: federationAddress,
       };
@@ -248,7 +246,10 @@ export class FederationResolver {
     }
 
     // Validate memo type if present
-    if (response.memo_type && !["id", "text", "hash", "none"].includes(response.memo_type)) {
+    if (
+      response.memo_type &&
+      !["id", "text", "hash", "none"].includes(response.memo_type)
+    ) {
       return err(
         SorokitErrorCode.VALIDATION,
         `Invalid memo_type in federation response: ${response.memo_type}`,
@@ -366,6 +367,14 @@ export class FederationResolver {
     maxSize: number;
     ttlMs: number;
   } {
+    // Enforce max cache size by removing oldest entries
+    while (this.cache.size > this.config.maxCacheSize) {
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey) {
+        this.cache.delete(firstKey);
+      }
+    }
+
     return {
       size: this.cache.size,
       maxSize: this.config.maxCacheSize,
@@ -378,10 +387,13 @@ export class FederationResolver {
    */
   async verifyIdentity(
     federationAddress: string,
-  ): Promise<SorokitResult<{ verified: boolean; metadata?: Record<string, unknown> }>> {
+  ): Promise<
+    SorokitResult<{ verified: boolean; metadata?: Record<string, unknown> }>
+  > {
     const resolveResult = await this.resolveAddress(federationAddress);
     if (resolveResult.status === "error") {
-      return resolveResult;
+      // If resolution fails, return ok with verified: false instead of error
+      return ok({ verified: false });
     }
 
     const resolved = resolveResult.data;
@@ -414,7 +426,9 @@ export class FederationResolver {
   /**
    * Extract identity metadata from stellar.toml
    */
-  private extractIdentityMetadata(stellarToml: string): Record<string, unknown> {
+  private extractIdentityMetadata(
+    stellarToml: string,
+  ): Record<string, unknown> {
     const metadata: Record<string, unknown> = {};
 
     // Extract common identity fields
@@ -429,7 +443,9 @@ export class FederationResolver {
     ];
 
     fields.forEach((field) => {
-      const match = stellarToml.match(new RegExp(`${field}\\s*=\\s*["']([^"']+)["']`));
+      const match = stellarToml.match(
+        new RegExp(`${field}\\s*=\\s*["']([^"']+)["']`),
+      );
       if (match) {
         metadata[field] = match[1];
       }
@@ -476,6 +492,8 @@ export function clearFederationCache(address?: string): void {
  */
 export async function verifyIdentity(
   federationAddress: string,
-): Promise<SorokitResult<{ verified: boolean; metadata?: Record<string, unknown> }>> {
+): Promise<
+  SorokitResult<{ verified: boolean; metadata?: Record<string, unknown> }>
+> {
   return defaultResolver.verifyIdentity(federationAddress);
 }
