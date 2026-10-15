@@ -101,6 +101,7 @@ function documentFor(
   services?: Array<Record<string, unknown>>,
 ): StellarDIDDocument {
   const method = `${did}#key-1`;
+  const now = new Date().toISOString();
   return {
     "@context": [
       "https://www.w3.org/ns/did/v1",
@@ -108,7 +109,7 @@ function documentFor(
     ],
     id: did,
     controller: did,
-    created: new Date().toISOString(),
+    created: now,
     verificationMethod: [
       {
         id: method,
@@ -152,7 +153,13 @@ export interface ResolveDIDOptions {
 export async function resolveDID(
   did: string,
   options?: ResolveDIDOptions,
-): Promise<SorokitResult<{ publicKey: string; document: StellarDIDDocument }>> {
+): Promise<
+  SorokitResult<{
+    publicKey: string;
+    document: StellarDIDDocument;
+    did: string;
+  }>
+> {
   const parsed = parseDID(did);
   if (parsed.status === "error") {
     // If this is a non-stellar DID without a resolver, provide a specific error
@@ -185,7 +192,7 @@ export async function resolveDID(
           );
         }
       }
-      return ok({ publicKey: parsed.data, document: resolvedDoc });
+      return ok({ publicKey: parsed.data, document: resolvedDoc, did });
     } catch (cause) {
       return err(
         SorokitErrorCode.NETWORK_ERROR,
@@ -206,11 +213,11 @@ export async function resolveDID(
   // Fall back to local storage or generate on-the-fly for stellar DIDs
   const stored = links.get(did);
   if (stored) {
-    return ok({ publicKey: stored.publicKey, document: stored.document });
+    return ok({ publicKey: stored.publicKey, document: stored.document, did });
   }
 
   const document = documentFor(did, parsed.data);
-  return ok({ publicKey: parsed.data, document });
+  return ok({ publicKey: parsed.data, document, did });
 }
 
 export interface LinkAccountToDIDOptions {
@@ -254,20 +261,27 @@ export async function linkAccountToDID(
   const parsed = parseDID(did);
   if (parsed.status === "error") return parsed;
 
+  // Build document with proper types to match StellarDIDDocument
+  const doc: StellarDIDDocument = {
+    "@context": document["@context"],
+    id: document.id,
+    controller: document.controller ?? did, // Ensure non-undefined
+    created: document.created ?? new Date().toISOString(), // Ensure non-undefined
+    verificationMethod: document.verificationMethod,
+    authentication: document.authentication,
+    ...(document.expires ? { expires: document.expires } : {}),
+    ...(document.assertionMethod
+      ? { assertionMethod: document.assertionMethod }
+      : {}),
+    ...(document.service && document.service.length > 0
+      ? { service: document.service }
+      : {}),
+  };
+
   const linked: DIDData = {
     did,
     publicKey: parsed.data,
-    document: {
-      "@context": document["@context"],
-      id: document.id,
-      controller: document.controller,
-      created: document.created,
-      expires: document.expires,
-      verificationMethod: document.verificationMethod,
-      authentication: document.authentication,
-      assertionMethod: document.assertionMethod,
-      service: document.service,
-    },
+    document: doc,
     linkedAt: new Date().toISOString(),
     method: STELLAR_DID_METHOD,
   };
