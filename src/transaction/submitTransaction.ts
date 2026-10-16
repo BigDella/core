@@ -79,6 +79,38 @@ function getReplayRecord(horizonUrl: string, txHash: string, ttlMs = 300_000): R
   return record;
 }
 
+/** Snapshot of the in-process replay-protection registry (for observability/tests). */
+export interface ReplayProtectionStats {
+  /** Number of transaction hashes currently tracked. */
+  trackedHashes: number;
+  /** The tracked entries, including the Horizon endpoint they were submitted to. */
+  entries: Array<{ horizonUrl: string; hash: string; submittedAt: number }>;
+}
+
+/**
+ * Clear every entry from the in-process replay-protection registry.
+ *
+ * This is a test/reset helper — comparable to `clearThrottlingState` elsewhere
+ * in the SDK. It only affects this process; Horizon's own sequence-number rules
+ * remain the authoritative cross-process/replay guard.
+ */
+export function clearReplayProtection(): void {
+  _submittedHashes.clear();
+}
+
+/** Inspect the in-process replay-protection registry (for observability/tests). */
+export function getReplayProtectionStats(): ReplayProtectionStats {
+  const entries = Array.from(_submittedHashes.entries()).map(([key, record]) => {
+    const separator = key.indexOf("|");
+    return {
+      horizonUrl: separator === -1 ? key : key.slice(0, separator),
+      hash: record.hash,
+      submittedAt: record.submittedAt,
+    };
+  });
+  return { trackedHashes: entries.length, entries };
+}
+
 function describeSubmissionFailure(cause: unknown): string {
   if (isXdrInvalidError(cause)) {
     return `Transaction submission failed because the signed XDR is malformed: ${toMessage(cause)}`;

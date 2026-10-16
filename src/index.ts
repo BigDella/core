@@ -479,6 +479,8 @@ export {
   addSignature,
   isComplete,
   getSigningStatus,
+  serializeSigningRequest,
+  deserializeSigningRequest,
 } from "./transaction/signingCoordinator";
 export type {
   SigningRequest,
@@ -783,7 +785,12 @@ export type {
   TemplateParamValue,
 } from "./transaction";
 // Standalone transaction functions for use without a client instance
-export { submitTransaction } from "./transaction/submitTransaction";
+export {
+  submitTransaction,
+  clearReplayProtection,
+  getReplayProtectionStats,
+} from "./transaction/submitTransaction";
+export type { ReplayProtectionStats } from "./transaction/submitTransaction";
 export {
   checkMainnetSafety,
   extractTransactionTotalXlm,

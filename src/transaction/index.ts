@@ -106,7 +106,12 @@ export type {
   TrustlineApprovalDecision,
   ApprovedTrustlineBuild,
 } from "../account/trustlinePolicy";
-export { submitTransaction } from "./submitTransaction";
+export {
+  submitTransaction,
+  clearReplayProtection,
+  getReplayProtectionStats,
+} from "./submitTransaction";
+export type { ReplayProtectionStats } from "./submitTransaction";
 export { getTransactionStatus } from "./status";
 export { estimateFee } from "./estimateFee";
 export {
@@ -704,6 +709,8 @@ export {
   addSignature,
   isComplete,
   getSigningStatus,
+  serializeSigningRequest,
+  deserializeSigningRequest,
 } from "./signingCoordinator";
 export type {
   SigningRequest,
