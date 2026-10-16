@@ -19,3 +19,5 @@ export {
   MOCK_CONTRACT_CALL_RESULT,
 } from "./mockClient";
 export type { MockClientConfig } from "./mockClient";
+export { createMockContractEventGenerator, createMockEventStream } from "./mockEventStream";
+export type { MockContractEventGeneratorOptions, MockEventStreamOptions } from "./mockEventStream";

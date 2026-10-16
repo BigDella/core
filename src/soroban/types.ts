@@ -2,6 +2,7 @@
  * Soroban module public types.
  */
 import type { xdr } from "@stellar/stellar-sdk";
+import type { ContractEvent } from "./subscribeContractEvents";
 
 export interface ContractMethodInput {
   name: string;
@@ -143,4 +144,32 @@ export type ContractResultType =
 export interface ParsedContractResult {
   type: string;
   value: unknown;
+}
+
+export interface DecodedContractEvent {
+  contractId: string;
+  name: string;
+  topics: string[];
+  value: unknown;
+  raw: unknown;
+  type: string;
+}
+
+export interface StreamContractEventsOptions {
+  horizonUrl: string;
+  intervalMs?: number;
+  maxBackoffMs?: number;
+  fetch?: typeof fetch;
+  onEvent: (events: ContractEvent[]) => void;
+  onError?: (err: Error, attempt: number) => void;
+  onReconnect?: (attempt: number) => void;
+}
+
+export interface EventIndexFilter {
+  contractId?: string;
+  name?: string;
+  topics?: string[];
+  minLedger?: number;
+  maxLedger?: number;
+  predicate?: (event: ContractEvent) => boolean;
 }

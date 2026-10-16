@@ -12,6 +12,9 @@ export { executeContract } from "./executeContract";
 export { invokeContract } from "./invokeContract";
 export { invokeBatchContracts } from "./invokeBatchContracts";
 export { subscribeContractEvents, queryContractEvents } from "./subscribeContractEvents";
+export { streamContractEventsRealTime } from "./streamContractEventsRealTime";
+export { decodeContractEvent } from "./decodeContractEvent";
+export { EventIndex } from "./eventIndex";
 export { getContractMethods } from "./contractMetadata";
 export { validateContractAbi } from "./validateContractAbi";
 export { buildContractDeploy } from "./deployContract";
@@ -43,4 +46,7 @@ export type {
   SimulateTransactionResult,
   BatchContractInvocation,
   BatchContractResult,
+  DecodedContractEvent,
+  StreamContractEventsOptions,
+  EventIndexFilter,
 } from "./types";
