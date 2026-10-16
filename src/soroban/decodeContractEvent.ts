@@ -76,7 +76,7 @@ export function decodeContractEvent(
   rawEvent: unknown,
   abi?: ContractAbi,
 ): SorokitResult<DecodedContractEvent> {
-  if (!isRecord(rawEvent)) {
+  if (!isRecord(rawEvent) || Array.isArray(rawEvent)) {
     return err(
       SorokitErrorCode.CONTRACT_READ_FAILED,
       "malformed event: expected an object",
