@@ -144,6 +144,20 @@ export type {
   DestinationValidationResult,
   ValidateDestinationOptions,
 } from "./validateDestination";
+export {
+  submitBatch,
+  wasAtomicExecuted,
+  suggestRetryStrategy,
+  generateRollbackInstructions,
+} from "./batchSubmitter";
+export type {
+  BatchConfig,
+  BatchSubmissionResult,
+  BatchTransactionStatus,
+  BatchTransactionStatusCode,
+  RetryStrategy,
+  RollbackInstruction,
+} from "./batchSubmitter";
 // ─── Asset constants and factories ───────────────────────────────────────────
 export const USDC_MAINNET_ISSUER =
   "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";

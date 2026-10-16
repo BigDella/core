@@ -159,6 +159,20 @@ export type {
   CustomValidationRule,
   ParsedOperation,
 } from "./transaction/validateTransaction";
+export {
+  submitBatch,
+  wasAtomicExecuted,
+  suggestRetryStrategy,
+  generateRollbackInstructions,
+} from "./transaction";
+export type {
+  BatchConfig,
+  BatchSubmissionResult,
+  BatchTransactionStatus,
+  BatchTransactionStatusCode,
+  RetryStrategy,
+  RollbackInstruction,
+} from "./transaction";
 
 // ─── Soroban types ────────────────────────────────────────────────────────────
 export { simulateContractSafe } from "./soroban/simulateContractSafe";
