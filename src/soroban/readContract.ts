@@ -6,7 +6,6 @@ import {
   rpc as SorobanRpc,
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
-import { toMessage } from "../shared";
 import { DEFAULT_SOROBAN_TX_TIMEOUT_SECONDS } from "../shared/constants";
 import type { SorokitResult } from "../shared/response";
 import { err, ok, SorokitErrorCode } from "../shared/response";
@@ -17,6 +16,8 @@ import { createContractReadCacheKey } from "./contractCallIdentity";
 import type { ContractCallResult, ContractReadParams } from "./types";
 import { validateContractAbi } from "./validateContractAbi";
 import { createHorizonServer, createSorobanServer } from "../shared/serverFactory";
+import { validatePublicKey } from "../shared/validation";
+import { mapSorobanRpcResult } from "./rpcErrorMapper";
 
 /**
  * Read (simulate) a Soroban contract view function — no signing required.
@@ -55,6 +56,16 @@ export async function readContract(
   networkConfig: ResolvedNetworkConfig,
   params: ContractReadParams,
 ): Promise<SorokitResult<ContractCallResult>> {
+  // ── Input validation (before any network call or side effect) ──────────────
+  const pkResult = validatePublicKey(params.publicKey);
+  if (pkResult.status === "error") {
+    return err(
+      SorokitErrorCode.CONTRACT_READ_FAILED,
+      `publicKey — ${pkResult.error.message}`,
+    );
+  }
+  // ── End input validation ───────────────────────────────────────────────────
+
   const abiValidation = validateContractAbi({
     contractAbi: params.contractAbi,
     method: params.method,
@@ -122,11 +133,7 @@ export async function readContract(
       const simResult = await rpc.simulateTransaction(tx);
 
       if (SorobanRpc.Api.isSimulationError(simResult)) {
-        return err(
-          SorokitErrorCode.CONTRACT_READ_FAILED,
-          `Contract simulation error: ${simResult.error}`,
-          simResult,
-        );
+        return mapSorobanRpcResult<ContractCallResult>(simResult);
       }
 
       if (!SorobanRpc.Api.isSimulationSuccess(simResult) || !simResult.result) {
@@ -146,11 +153,7 @@ export async function readContract(
 
       return ok(result);
     } catch (cause) {
-      return err(
-        SorokitErrorCode.CONTRACT_READ_FAILED,
-        `Failed to read contract: ${toMessage(cause)}`,
-        cause,
-      );
+      return mapSorobanRpcResult<ContractCallResult>(cause);
     }
   };
 

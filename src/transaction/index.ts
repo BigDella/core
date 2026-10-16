@@ -1,4 +1,11 @@
 import { Asset, Memo } from "@stellar/stellar-sdk";
+export { AtomicOrchestrator, orchestrate } from "./atomicOrchestrator";
+export type {
+  AtomicExecutionResult,
+  AtomicFailureContext,
+  AtomicOrchestratorOptions,
+  AtomicStepContext,
+} from "./atomicOrchestrator";
 
 export type SorokitMemo =
   | ReturnType<typeof Memo.text>
@@ -77,7 +84,6 @@ export {
   buildSwapTransaction,
   buildReverseTransaction,
   buildPathPayment,
-  buildAtomicSwap,
   buildAccountMerge,
   checkTrustlines,
   buildBulkTrustlines,
@@ -87,6 +93,9 @@ export {
   clearSequenceCache,
   validateMemoPolicy,
 } from "./buildTransaction";
+export { buildAtomicSwap } from "./atomicSwap";
+export { buildSetOptionsTransaction } from "./setOptions";
+export type { SetOptionsParams } from "./types";
 export type { AccountMergeOptions, TrustlineState } from "./buildTransaction";
 export {
   evaluateTrustlineApproval,
@@ -97,7 +106,12 @@ export type {
   TrustlineApprovalDecision,
   ApprovedTrustlineBuild,
 } from "../account/trustlinePolicy";
-export { submitTransaction } from "./submitTransaction";
+export {
+  submitTransaction,
+  clearReplayProtection,
+  getReplayProtectionStats,
+} from "./submitTransaction";
+export type { ReplayProtectionStats } from "./submitTransaction";
 export { getTransactionStatus } from "./status";
 export { estimateFee } from "./estimateFee";
 export {
@@ -115,6 +129,40 @@ export type {
 export { reverseTransaction, issueRefund } from "./refunds";
 export type { RefundParams, RefundDetails } from "./refunds";
 export { streamTransactions } from "./streamTransactions";
+export { streamTransactionsSSE, buildTransactionSSEUrl } from "./streamTransactionsSSE";
+// ─── Real-time transaction status dashboard (#708) ───────────────────────────
+export {
+  TransactionStatusAggregator,
+  createTransactionStatusAggregator,
+  categorizeTransaction,
+  categoryFromOperationType,
+  filterDashboardTransactions,
+  streamTransactionStatus,
+  attachTransactionStreamToDashboard,
+  createWebSocketTransactionFeed,
+  REACT_DASHBOARD_EXAMPLE,
+  VUE_DASHBOARD_EXAMPLE,
+} from "./transactionDashboard";
+export type {
+  TransactionCategory,
+  DashboardTimeRange,
+  DashboardTimeWindow,
+  DashboardEntryHints,
+  DashboardTransactionEntry,
+  DashboardFilter,
+  DashboardMetrics,
+  DashboardChartPoint,
+  DashboardFeePoint,
+  DashboardChartData,
+  DashboardSnapshot,
+  DashboardListener,
+  TransactionStatusAggregatorOptions,
+  TransactionStatusStreamOptions,
+  TransactionStatusStreamHandle,
+  WebSocketTransactionFeedOptions,
+  WebSocketTransactionFeedHandle,
+  WebSocketLike,
+} from "./transactionDashboard";
 
 // ─── Claimable balances (#543) ─────────────────────────────────────────────────
 export {
@@ -252,6 +300,15 @@ export {
   DEFAULT_PRIORITY_MULTIPLIERS,
   calculateAdaptiveFee,
 } from "./estimateFee";
+export type { FeeNetwork } from "./feePolicy";
+export {
+  PROTOCOL_BASE_FEE,
+  NETWORK_BASE_FEE_MULTIPLIERS,
+  DEFAULT_BASE_FEE_MULTIPLIER,
+  getNetworkBaseFeeMultiplier,
+  getNetworkBaseFee,
+  resolveNetworkBaseFee,
+} from "./feePolicy";
 export {
   findSwapPath,
   buildPathPaymentTransaction,
@@ -494,9 +551,6 @@ export const EURC_MAINNET_ISSUER =
 export const EURC_TESTNET_ISSUER =
   "GB3Q6QDZYTHWT7E5PVS3W7FUT5GVAFC5KSZFFLPU25GO7VTC3NM2ZTVO";
 
-export { compose } from "./compose";
-export type { OperationStep, ComposedPipeline } from "./compose";
-
 export function nativeAsset(): Asset {
   return Asset.native();
 }
@@ -669,3 +723,70 @@ export type {
   DecodingResult,
   TransactionDelta,
 } from "./xdrEncodingTypes";
+
+export { buildSetDataEntryTransaction, buildDeleteDataEntryTransaction } from "./dataEntry";
+export type { DataEntryTransactionOptions } from "./dataEntry";
+
+// ─── Transaction signing coordination (#586) ──────────────────────────────────
+export {
+  createSigningRequest,
+  addSignature,
+  isComplete,
+  getSigningStatus,
+  serializeSigningRequest,
+  deserializeSigningRequest,
+} from "./signingCoordinator";
+export type {
+  SigningRequest,
+  SigningStatus,
+} from "./signingCoordinator";
+
+// ─── Time-locked transaction scheduling (#587) ────────────────────────────────
+export {
+  buildTimeLockTransaction,
+  getTimeLockedTransactionStatus,
+  validateTimeBounds,
+} from "./timeLocks";
+export type {
+  TimeBounds,
+  TimeLockExecutionStatus,
+} from "./timeLocks";
+
+// ─── Transaction cost forecasting (#588) ──────────────────────────────────────
+export {
+  forecastTransactionCost,
+  compareCosts,
+  suggestOptimization,
+  analyzeBatchCost,
+} from "./costForecasting";
+export type {
+  CostForecast as TransactionCostForecast,
+  CostComparison,
+  OptimizationSuggestion,
+} from "./costForecasting";
+
+// ─── Batch transaction submission (#589) ──────────────────────────────────────
+export {
+  submitBatch,
+  getTransactionStatus as getBatchTransactionStatus,
+  generateRollbackInstructions,
+  wasAtomicExecuted,
+  suggestRetryStrategy,
+} from "./batchSubmitter";
+export type {
+  TransactionBatchStatus,
+  BatchTransactionStatus,
+  BatchSubmissionOptions,
+  BatchSubmissionResult,
+} from "./batchSubmitter";
+
+// ─── Transaction simulation and safe execution preview (#612) ─────────────────
+export { previewTransaction } from "./simulationPreview";
+export type {
+  TransactionPreview,
+  PreviewTransactionOptions,
+  PreviewAsset,
+  BalanceEffect,
+  StateChange,
+  PreviewSummaryLine,
+} from "./simulationPreview";

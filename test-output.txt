@@ -1,0 +1,970 @@
+﻿
+> sorokit-core@0.1.0 test
+> vitest --run
+
+node.exe : [33mThe CJS build of Vite's Node API is deprecated. See 
+https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for 
+more details.[39m
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([33mThe CJS bu...e details.[39 
+   m:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mC:/Users/DELL/OneDrive/Documents/Codes/sorokit/core[39m
+[2m      Coverage enabled with [22m[33mv8[39m
+
+ [32mΓ£ô[39m src/tests/contract-event-recovery.test.ts [2m ([22m[2m13 tests[22m[2m)[22m[90m 104[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/validation.test.ts [2m ([22m[2m74 tests[22m[2m)[22m[90m 73[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/validateTransaction.test.ts [2m ([22m[2m33 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/liquidityPool.test.ts [2m ([22m[2m35 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/manageOffer.test.ts [2m ([22m[2m32 tests[22m[2m)[22m[90m 53[2mms[22m[39m
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2maccount[2m > 
+[22m[2mstreamAccount[2m > [22m[2mstreamAccount emit/clamp behavior 
+(#276)[2m > [22m[2mintervalMs 500 is clamped to 1000ms verifiable via fake 
+timers[22m[39m
+intervalMs clamped from 500ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2maccount[2m > 
+[22m[2mstreamAccount deduplication[2m > [22m[2mdoes not re-emit when 
+account state is unchanged[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2maccount[2m > 
+[22m[2mstreamAccount deduplication[2m > [22m[2memits again when account 
+state changes[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2maccount[2m > 
+[22m[2mevaluateBalanceAlerts[2m > [22m[2mstreamAccount dispatches alerts 
+to onAlert as balances change[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+ [32mΓ£ô[39m src/tests/shared.test.ts [2m ([22m[2m106 tests[22m[2m)[22m[33m 449[2mms[22m[39m
+[90mstderr[2m | src/tests/soroban.test.ts[2m > [22m[2msoroban contract 
+metadata[2m > [22m[2mevicts oldest entries when memory cache exceeds its 
+max size[22m[39m
+[sorokit] contract metadata cache at capacity (100); oldest entries evicted 
+(LRU). Increase via setMetadataCacheCapacity() if needed.
+[sorokit] contract metadata cache at capacity (100); oldest entries evicted 
+(LRU). Increase via setMetadataCacheCapacity() if needed.
+[sorokit] contract metadata cache at capacity (100); oldest entries evicted 
+(LRU). Increase via setMetadataCacheCapacity() if needed.
+[sorokit] contract metadata cache at capacity (100); oldest entries evicted 
+(LRU). Increase via setMetadataCacheCapacity() if needed.
+[sorokit] contract metadata cache at capacity (100); oldest entries evicted 
+(LRU). Increase via setMetadataCacheCapacity() if needed.
+
+ [32mΓ£ô[39m src/shared/cacheInvalidation.test.ts [2m ([22m[2m37 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/soroban.test.ts [2m ([22m[2m140 tests[22m [2m|[22m [33m28 skipped[39m[2m)[22m[90m 189[2mms[22m[39m
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+onBalanceChange callback (#11)[2m > [22m[2mfires onBalanceChange when a 
+balance changes between polls[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+onBalanceChange callback (#11)[2m > [22m[2mdoes not fire onBalanceChange 
+when balances are unchanged[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+onBalanceChange callback (#11)[2m > [22m[2mfires onBalanceChange for each 
+changed balance independently[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+ [32mΓ£ô[39m src/tests/spendingPolicy.test.ts [2m ([22m[2m44 tests[22m[2m)[22m[90m 32[2mms[22m[39m
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+onBalanceChange callback (#11)[2m > [22m[2mfires onBalanceAdd when a new 
+asset balance is added[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+onBalanceChange callback (#11)[2m > [22m[2mfires onBalanceRemove when an 
+asset balance is removed[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+onBalanceChange callback (#11)[2m > [22m[2mfires all balance event 
+callbacks in correct order[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+emitOnStart, maxPolls, AbortSignal, mid-stream error (#235)[2m > 
+[22m[2mmaxPolls: 2 stops after exactly 2 polls[22m[39m
+intervalMs clamped from 100ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+emitOnStart, maxPolls, AbortSignal, mid-stream error (#235)[2m > 
+[22m[2mAbortSignal terminates the generator early[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+emitOnStart, maxPolls, AbortSignal, mid-stream error (#235)[2m > 
+[22m[2mmid-stream error yields err result without ending the 
+stream[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+emitOnStart, maxPolls, AbortSignal, mid-stream error (#235)[2m > 
+[22m[2mautomatic retry with exponential backoff[2m > [22m[2mretries 
+transient errors with exponential backoff[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+emitOnStart, maxPolls, AbortSignal, mid-stream error (#235)[2m > 
+[22m[2mautomatic retry with exponential backoff[2m > [22m[2memits error 
+after max consecutive failures and enters cooldown[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+ [32mΓ£ô[39m src/tests/diagnostics.test.ts [2m ([22m[2m53 tests[22m[2m)[22m[33m 517[2mms[22m[39m
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+emitOnStart, maxPolls, AbortSignal, mid-stream error (#235)[2m > 
+[22m[2mautomatic retry with exponential backoff[2m > [22m[2mresets 
+failure counter on successful poll[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+emitOnStart, maxPolls, AbortSignal, mid-stream error (#235)[2m > 
+[22m[2mautomatic retry with exponential backoff[2m > [22m[2mdoes not 
+retry when enableAutoRetry is false[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/account.test.ts[2m > [22m[2mstreamAccount ΓÇö 
+emitOnStart, maxPolls, AbortSignal, mid-stream error (#235)[2m > 
+[22m[2mautomatic retry with exponential backoff[2m > [22m[2mdoes not 
+retry non-transient errors[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+ [32mΓ£ô[39m src/tests/contractEventArchival.test.ts [2m ([22m[2m37 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/account.test.ts [2m ([22m[2m84 tests[22m[2m)[22m[33m 1323[2mms[22m[39m
+[90mstderr[2m | src/tests/transaction.test.ts[2m > [22m[2mtransaction 
+streaming filters[2m > [22m[2mupdates cursor on subsequent poll when 
+config.cursor is provided with maxPolls: 2[22m[39m
+intervalMs clamped from 10ms to 1000ms
+
+[90mstderr[2m | src/tests/transaction.test.ts[2m > [22m[2mtransaction 
+streaming retry with exponential backoff[2m > [22m[2mretries transient 
+errors with exponential backoff[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/transaction.test.ts[2m > [22m[2mtransaction 
+streaming retry with exponential backoff[2m > [22m[2memits error after max 
+consecutive failures and enters cooldown[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/transaction.test.ts[2m > [22m[2mtransaction 
+streaming retry with exponential backoff[2m > [22m[2mresets failure 
+counter on successful poll[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/transaction.test.ts[2m > [22m[2mtransaction 
+streaming retry with exponential backoff[2m > [22m[2mdoes not retry when 
+enableAutoRetry is false[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+[90mstderr[2m | src/tests/transaction.test.ts[2m > [22m[2mtransaction 
+streaming retry with exponential backoff[2m > [22m[2mdoes not retry 
+non-transient errors (404)[22m[39m
+intervalMs clamped from 1ms to 1000ms
+
+ [32mΓ£ô[39m src/tests/transaction.test.ts [2m ([22m[2m229 tests[22m [2m|[22m [33m30 skipped[39m[2m)[22m[90m 296[2mms[22m[39m
+ [33mΓ¥»[39m src/tests/wallet.test.ts [2m ([22m[2m123 tests[22m [2m|[22m [31m4 failed[39m[2m)[22m[90m 241[2mms[22m[39m
+[31m   [33mΓ¥»[31m src/tests/wallet.test.ts[2m > [22mwallet discovery (#wallet-discovery)[2m > [22mdiscoverWallet[2m > [22mresolves a wallet address via federation[39m
+[31m     ΓåÆ expected "spy" to be called with arguments: [ StringContaining{ΓÇª}, Any<Object> ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  Array [[22m
+[32m-   StringContaining "stellar_address=alice%2Aexample.com",[90m
+[32m-   Any<Object>,[90m
+[31m+   "https://example.com/.well-known/stellar.toml",[90m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[31m   [33mΓ¥»[31m src/tests/wallet.test.ts[2m > [22mwallet discovery (#wallet-discovery)[2m > [22mdiscoverWallet[2m > [22mfalls back to stellar.toml when federation returns no account[39m
+[31m     ΓåÆ expected 'error' to be 'ok' // Object.is equality[39m
+[31m   [33mΓ¥»[31m src/tests/wallet.test.ts[2m > [22mwallet discovery (#wallet-discovery)[2m > [22mdiscoverWallet[2m > [22mreturns WALLET_NOT_FOUND when both federation and stellar.toml fail[39m
+[31m     ΓåÆ expected 'NETWORK_ERROR' to be 'WALLET_NOT_FOUND' // Object.is equality[39m
+[31m   [33mΓ¥»[31m src/tests/wallet.test.ts[2m > [22mwallet discovery (#wallet-discovery)[2m > [22mdiscoverWallet[2m > [22mreturns WALLET_NOT_FOUND when fetch throws a network error[39m
+[31m     ΓåÆ expected 'NETWORK_ERROR' to be 'WALLET_NOT_FOUND' // Object.is equality[39m
+ [32mΓ£ô[39m src/tests/feeForecast.test.ts [2m ([22m[2m35 tests[22m[2m)[22m[90m 55[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/walletAuthentication.test.ts [2m ([22m[2m38 tests[22m[2m)[22m[33m 2266[2mms[22m[39m
+[90mstderr[2m | src/tests/mainnetSafety.test.ts[2m > [22m[2mMainnet 
+Safety Guards (#577)[2m > [22m[2mcheckMainnetSafety[2m > [22m[2mreturns 
+MAINNET_SAFETY_LIMIT error when Mainnet transaction exceeds threshold without 
+override[22m[39m
+[sorokit] Mainnet Safety Warning: transaction total amount of 1500 XLM 
+exceeds safety threshold of 1000 XLM. {
+  totalXlm: [33m1500[39m,
+  unboundedOperations: [],
+  thresholdXlm: [33m1000[39m,
+  bypassMainnetSafety: [33mfalse[39m,
+  operationCount: [33m1[39m,
+  sourceAccount: 
+[32m'GD2IVIVRYUCTM2NXVIQUJA5XNNVU7ZPA6B7KJNML7OI7B5LVSEMAQQGV'[39m
+}
+
+[90mstderr[2m | src/tests/mainnetSafety.test.ts[2m > [22m[2mMainnet 
+Safety Guards (#577)[2m > [22m[2mcheckMainnetSafety[2m > [22m[2mhonors 
+custom threshold (e.g., 200 XLM)[22m[39m
+[sorokit] Mainnet Safety Warning: transaction total amount of 300 XLM exceeds 
+safety threshold of 200 XLM. {
+  totalXlm: [33m300[39m,
+  unboundedOperations: [],
+  thresholdXlm: [33m200[39m,
+  bypassMainnetSafety: [33mfalse[39m,
+  operationCount: [33m1[39m,
+  sourceAccount: 
+[32m'GCHGNVKAV6BGFL7EWPS43G3LJTMVEORSM55FL7MCGWTY77XZHRS6CYO2'[39m
+}
+
+[90mstderr[2m | src/tests/mainnetSafety.test.ts[2m > [22m[2mMainnet 
+Safety Guards (#577)[2m > [22m[2msubmitTransaction Integration[2m > 
+[22m[2mhalts submission before Horizon when Mainnet transaction exceeds 
+threshold[22m[39m
+[sorokit] Mainnet Safety Warning: transaction total amount of 2000 XLM 
+exceeds safety threshold of 1000 XLM. {
+  totalXlm: [33m2000[39m,
+  unboundedOperations: [],
+  thresholdXlm: [33m1000[39m,
+  bypassMainnetSafety: [33mfalse[39m,
+  operationCount: [33m1[39m,
+  sourceAccount: 
+[32m'GCWGKUYD6UGRHNCN5CKQIT3SB53HW4VSGOQ3UMZ42YH57NRSSUVZ4YEV'[39m
+}
+
+[90mstderr[2m | src/tests/mainnetSafety.test.ts[2m > [22m[2mMainnet 
+Safety Guards (#577)[2m > [22m[2msubmitTransaction Integration[2m > 
+[22m[2mproceeds past safety check when bypassMainnetSafety option is 
+set[22m[39m
+[sorokit] Mainnet Safety Warning: transaction total amount of 2000 XLM 
+exceeds safety threshold of 1000 XLM. {
+  totalXlm: [33m2000[39m,
+  unboundedOperations: [],
+  thresholdXlm: [33m1000[39m,
+  bypassMainnetSafety: [33mtrue[39m,
+  operationCount: [33m1[39m,
+  sourceAccount: 
+[32m'GBNAMIT7B3CVYEUAHWVDPYTOS5CQ6ZPOERH3SXIKFENQXMH2MEEA4DHM'[39m
+}
+
+ [33mΓ¥»[39m src/tests/didSupport.test.ts [2m ([22m[2m36 tests[22m [2m|[22m [31m6 failed[39m[2m)[22m[90m 68[2mms[22m[39m
+[31m   [33mΓ¥»[31m src/tests/didSupport.test.ts[2m > [22mresolveDID[2m > [22mself-resolves a did:stellar DID when no resolver is provided[39m
+[31m     ΓåÆ expected undefined to be 'did:stellar:GAHJJJKMOKYE4RVPZEWZTKH5FΓÇª' // Object.is equality[39m
+[31m   [33mΓ¥»[31m src/tests/didSupport.test.ts[2m > [22mresolveDID[2m > [22mself-resolution produces a StellarVerificationKey2024 method[39m
+[31m     ΓåÆ Cannot read properties of undefined (reading '0')[39m
+[31m   [33mΓ¥»[31m src/tests/didSupport.test.ts[2m > [22mresolveDID[2m > [22mreturns the document from a custom resolver when one is provided[39m
+[31m     ΓåÆ expected { ΓÇª(3) } to deeply equal { '@context': [ ΓÇª(2) ], ΓÇª(6) }[39m
+[31m   [33mΓ¥»[31m src/tests/didSupport.test.ts[2m > [22mresolveDID[2m > [22mreturns INVALID_CONFIG for a non-stellar DID without a resolver[39m
+[31m     ΓåÆ expected 'Invalid did:stellar identifier: did:eΓÇª' to contain 'no resolver was provided'[39m
+[31m   [33mΓ¥»[31m src/tests/didSupport.test.ts[2m > [22mverifyDIDOwnership[2m > [22mreturns verified=true for a valid proof structure with a key in the document[39m
+[31m     ΓåÆ expected false to be true // Object.is equality[39m
+[31m   [33mΓ¥»[31m src/tests/didSupport.test.ts[2m > [22mverifyDIDOwnership[2m > [22mreturns an error when proof.signature is an empty string[39m
+[31m     ΓåÆ expected 'Proof must include a signature' to contain 'missing a signature'[39m
+ [32mΓ£ô[39m src/tests/simulationPreview.test.ts [2m ([22m[2m18 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32mΓ£ô[39m src/wallet/throttling.test.ts [2m ([22m[2m39 tests[22m[2m)[22m[90m 116[2mms[22m[39m
+ [2m[90mΓåô[39m[22m tests/e2e/testnet.test.ts [2m ([22m[2m14 tests[22m [2m|[22m [33m14 skipped[39m[2m)[22m
+ [32mΓ£ô[39m src/tests/mainnetSafety.test.ts [2m ([22m[2m61 tests[22m[2m)[22m[33m 1413[2mms[22m[39m
+[90mstderr[2m | src/wallet/adapters/walletconnect.test.ts[2m > 
+[22m[2mWalletConnectAdapter[2m > [22m[2mconnect ΓÇö new pairing[2m > 
+[22m[2mreturns ok with public key after successful pairing[22m[39m
+[sorokit] WalletConnect pairing URI: wc:mock-uri
+
+[90mstderr[2m | src/wallet/adapters/walletconnect.test.ts[2m > 
+[22m[2mWalletConnectAdapter[2m > [22m[2mconnect ΓÇö new pairing[2m > 
+[22m[2mreturns WALLET_SIGN_REJECTED when user rejects the pairing[22m[39m
+[sorokit] WalletConnect pairing URI: wc:uri
+
+[90mstderr[2m | src/wallet/adapters/walletconnect.test.ts[2m > 
+[22m[2mWalletConnectAdapter[2m > [22m[2mconnect ΓÇö new pairing[2m > 
+[22m[2mreturns WALLET_CONNECT_FAILED when pairing fails for other 
+reasons[22m[39m
+[sorokit] WalletConnect pairing URI: wc:uri
+
+[90mstderr[2m | src/wallet/adapters/walletconnect.test.ts[2m > 
+[22m[2mWalletConnectAdapter[2m > [22m[2mconnect ΓÇö new pairing[2m > 
+[22m[2mreturns WALLET_CONNECT_FAILED when session has no accounts[22m[39m
+[sorokit] WalletConnect pairing URI: wc:uri
+
+[90mstderr[2m | src/wallet/adapters/walletconnect.test.ts[2m > 
+[22m[2mWalletConnectAdapter[2m > [22m[2msession lifecycle events[2m > 
+[22m[2mclears the session when session_expire fires[22m[39m
+[sorokit] WalletConnect pairing URI: wc:mock-uri
+
+ [32mΓ£ô[39m src/tests/multiSigExecution.test.ts [2m ([22m[2m39 tests[22m[2m)[22m[90m 93[2mms[22m[39m
+ [32mΓ£ô[39m src/wallet/adapters/walletconnect.test.ts [2m ([22m[2m26 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+ [32mΓ£ô[39m src/performance/telemetry.test.ts [2m ([22m[2m39 tests[22m[2m)[22m[90m 67[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/network.test.ts [2m ([22m[2m40 tests[22m[2m)[22m[90m 66[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/clawback.test.ts [2m ([22m[2m22 tests[22m[2m)[22m[90m 58[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/getOperations.test.ts [2m ([22m[2m27 tests[22m[2m)[22m[90m 40[2mms[22m[39m
+ [32mΓ£ô[39m src/integration/governance.test.ts [2m ([22m[2m31 tests[22m[2m)[22m[90m 77[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/walletSecurityAudit.test.ts [2m ([22m[2m36 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32mΓ£ô[39m src/soroban/contractDependencyResolver.test.ts [2m ([22m[2m24 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32mΓ£ô[39m src/transaction/transactionMixing.test.ts [2m ([22m[2m29 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/contractStateHistory.test.ts [2m ([22m[2m39 tests[22m[2m)[22m[90m 41[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/contractCache.test.ts [2m ([22m[2m21 tests[22m[2m)[22m[90m 36[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/query-transaction-history.test.ts [2m ([22m[2m18 tests[22m[2m)[22m[90m 59[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/error-scenarios.test.ts [2m ([22m[2m24 tests[22m[2m)[22m[33m 520[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/router-example.test.ts [2m ([22m[2m26 tests[22m[2m)[22m[90m 156[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/transaction-submit-status.test.ts [2m ([22m[2m16 tests[22m[2m)[22m[90m 167[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/templates.test.ts [2m ([22m[2m34 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/export-history.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+[90mstderr[2m | src\tests\e2e.test.ts:303:11[22m[39m
+Skipping E2E testnet suite: set RUN_E2E=1 (or run `npm run test:e2e`) to 
+execute it live.
+
+ [32mΓ£ô[39m src/tests/batchOperations.test.ts [2m ([22m[2m13 tests[22m[2m)[22m[90m 295[2mms[22m[39m
+ [2m[90mΓåô[39m[22m src/tests/e2e.test.ts [2m ([22m[2m7 tests[22m [2m|[22m [33m7 skipped[39m[2m)[22m
+ [32mΓ£ô[39m src/tests/assetPairs.test.ts [2m ([22m[2m25 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/mergeSafety.test.ts [2m ([22m[2m13 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/portfolioAggregation.test.ts [2m ([22m[2m32 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/circuitBreaker.test.ts [2m ([22m[2m21 tests[22m[2m)[22m[90m 41[2mms[22m[39m
+ [32mΓ£ô[39m src/soroban/storageMigration.test.ts [2m ([22m[2m20 tests[22m[2m)[22m[33m 350[2mms[22m[39m
+ [32mΓ£ô[39m src/account/complianceReporting.test.ts [2m ([22m[2m24 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/dependencyGraph.test.ts [2m ([22m[2m32 tests[22m[2m)[22m[90m 205[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/contractStateOptimization.test.ts [2m ([22m[2m33 tests[22m[2m)[22m[33m 823[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/client.test.ts [2m ([22m[2m36 tests[22m[2m)[22m[33m 5959[2mms[22m[39m
+ [32mΓ£ô[39m src/performance/cacheStrategy.test.ts [2m ([22m[2m26 tests[22m[2m)[22m[90m 55[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/accountHealth.test.ts [2m ([22m[2m21 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32mΓ£ô[39m src/transaction/consensus.test.ts [2m ([22m[2m26 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/endpointRegistry.test.ts [2m ([22m[2m25 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/validator.test.ts [2m ([22m[2m36 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32mΓ£ô[39m src/transaction/estimateFee.network.test.ts [2m ([22m[2m18 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/contractMetadataCompatibility.test.ts [2m ([22m[2m21 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32mΓ£ô[39m src/account/attestation.test.ts [2m ([22m[2m24 tests[22m[2m)[22m[90m 40[2mms[22m[39m
+ [32mΓ£ô[39m src/transaction/transactionQueue.test.ts [2m ([22m[2m33 tests[22m[2m)[22m[90m 33[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/sequenceContext.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 71[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/sessionPersistence.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 156[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/priceSubscriptions.test.ts [2m ([22m[2m17 tests[22m[2m)[22m[90m 103[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/contractVersion.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+ [32mΓ£ô[39m src/transaction/draftVersioning.test.ts [2m ([22m[2m16 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/trustlineManagement.test.ts [2m ([22m[2m17 tests[22m[2m)[22m[90m 78[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/contractInteractionBuilder.test.ts [2m ([22m[2m23 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32mΓ£ô[39m src/transaction/xdrEncoding.test.ts [2m ([22m[2m23 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/logger.test.ts [2m ([22m[2m17 tests[22m[2m)[22m[90m 48[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/paymentNotifications.test.ts [2m ([22m[2m28 tests[22m[2m)[22m[33m 6155[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/keyRotationRecovery.test.ts [2m ([22m[2m15 tests[22m[2m)[22m[90m 65[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/accountActivitySummaryCustomRange.test.ts [2m ([22m[2m16 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32mΓ£ô[39m src/soroban/storageExpiration.test.ts [2m ([22m[2m21 tests[22m[2m)[22m[90m 55[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/integration/transaction-flow.test.ts [2m ([22m[2m8 tests[22m[2m)[22m[90m 44[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/eventEmitter.test.ts [2m ([22m[2m17 tests[22m[2m)[22m[90m 55[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/issues-509-511-516-510.test.ts [2m ([22m[2m22 tests[22m[2m)[22m[90m 92[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/deploy-config-validation.test.ts [2m ([22m[2m21 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/sdk-capabilities.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[33m 2070[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/openTelemetry.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 95[2mms[22m[39m
+[90mstderr[2m | src/tests/integration/monitoring.test.ts[2m > 
+[22m[2mintegration: account streaming[2m > [22m[2myields account state 
+on the first poll[22m[39m
+intervalMs clamped from 10ms to 1000ms
+
+[90mstderr[2m | src/tests/integration/monitoring.test.ts[2m > 
+[22m[2mintegration: account streaming[2m > [22m[2myields multiple 
+account state updates across polls[22m[39m
+intervalMs clamped from 10ms to 1000ms
+
+ [32mΓ£ô[39m src/tests/discoverPaymentPaths.test.ts [2m ([22m[2m13 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/walletStatusTracker.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/integration/soroban-contract.test.ts [2m ([22m[2m7 tests[22m[2m)[22m[33m 309[2mms[22m[39m
+[90mstderr[2m | src/tests/integration/monitoring.test.ts[2m > 
+[22m[2mintegration: account streaming[2m > [22m[2mstops streaming when 
+aborted via AbortSignal[22m[39m
+intervalMs clamped from 50ms to 1000ms
+
+[90mstderr[2m | src/tests/integration/monitoring.test.ts[2m > 
+[22m[2mintegration: account streaming[2m > [22m[2myields error result 
+when account fetch fails[22m[39m
+intervalMs clamped from 10ms to 1000ms
+
+[90mstderr[2m | src/tests/integration/monitoring.test.ts[2m > 
+[22m[2mintegration: transaction monitoring[2m > [22m[2madvances cursor 
+between polls[22m[39m
+intervalMs clamped from 10ms to 1000ms
+
+ [32mΓ£ô[39m src/tests/mockClient.test.ts [2m ([22m[2m25 tests[22m[2m)[22m[90m 50[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/api-response-snapshots.test.ts [2m ([22m[2m12 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/sep7Handler.test.ts [2m ([22m[2m13 tests[22m[2m)[22m[90m 44[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/accountManager.test.ts [2m ([22m[2m14 tests[22m[2m)[22m[90m 61[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/webhook.test.ts [2m ([22m[2m27 tests[22m[2m)[22m[33m 10114[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/result.test.ts [2m ([22m[2m27 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/integration/monitoring.test.ts [2m ([22m[2m8 tests[22m[2m)[22m[33m 2169[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/operationTimeout.test.ts [2m ([22m[2m15 tests[22m[2m)[22m[90m 139[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/budget-regression.test.ts [2m ([22m[2m12 tests[22m[2m)[22m[90m 69[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/getAccountDeduplication.test.ts [2m ([22m[2m7 tests[22m[2m)[22m[90m 215[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/feeCalculator.test.ts [2m ([22m[2m19 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/integration/freighter.test.ts [2m ([22m[2m15 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/timeout.test.ts [2m ([22m[2m24 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/scheduler.test.ts [2m ([22m[2m12 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/wallet/adapters/rabet.test.ts [2m ([22m[2m27 tests[22m[2m)[22m[90m 74[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/requestBatching.test.ts [2m ([22m[2m9 tests[22m[2m)[22m[90m 187[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/integration/lobstr.test.ts [2m ([22m[2m15 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/amountFormatter.test.ts [2m ([22m[2m23 tests[22m[2m)[22m[90m 55[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/estimateFeeFix.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/profiling.test.ts [2m ([22m[2m12 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/tracing.test.ts [2m ([22m[2m15 tests[22m[2m)[22m[90m 40[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/contractErrors.test.ts [2m ([22m[2m15 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/assetRegistry.test.ts [2m ([22m[2m16 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/integration/wallet-account.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 43[2mms[22m[39m
+ [33mΓ¥»[39m src/network/federationResolver.test.ts [2m ([22m[2m14 tests[22m [2m|[22m [31m2 failed[39m[2m)[22m[33m 980[2mms[22m[39m
+[31m   [33mΓ¥»[31m src/network/federationResolver.test.ts[2m > [22mfederationResolver[2m > [22mFederationResolver[2m > [22mshould enforce max cache size[39m
+[31m     ΓåÆ expected 5 to be 2 // Object.is equality[39m
+[31m   [33mΓ¥»[31m src/network/federationResolver.test.ts[2m > [22mfederationResolver[2m > [22mverifyIdentity[2m > [22mshould return verification result[39m
+[31m     ΓåÆ expected 'error' to be 'ok' // Object.is equality[39m
+ [32mΓ£ô[39m src/tests/merge-main-features.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32mΓ£ô[39m src/transaction/atomicSwap.test.ts [2m ([22m[2m15 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/smartCache.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/feeBumpTransaction.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 67[2mms[22m[39m
+ [33mΓ¥»[39m src/lazy/lazy.test.ts [2m ([22m[2m16 tests[22m [2m|[22m [31m1 failed[39m[2m)[22m[33m 2036[2mms[22m[39m
+[31m   [33mΓ¥»[31m src/lazy/lazy.test.ts[2m > [22mnamed loaders (pre-#682 API)[2m > [22mare re-exported from the root entry point[39m
+[31m     ΓåÆ expected '/**\r\n * sorokit-core ΓÇö public API\rΓÇª' to contain 'loadModule'[39m
+ [32mΓ£ô[39m src/tests/e2e/multisig-workflows.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/anomalyDetection.test.ts [2m ([22m[2m8 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+[90mstderr[2m | src/tests/contractMetadataPreload.test.ts[2m > 
+[22m[2mSoroban Contract Metadata Preloading & LRU Cache[2m > 
+[22m[2mevicts least-recently-used entries when capacity is 
+exceeded[22m[39m
+[sorokit] contract metadata cache at capacity (2); oldest entries evicted 
+(LRU). Increase via setMetadataCacheCapacity() if needed.
+
+ [32mΓ£ô[39m src/tests/contractMetadataPreload.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/eventAnalytics.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 28[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/cache.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32mΓ£ô[39m src/account/recoveryHelper.test.ts [2m ([22m[2m6 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/issues-465-467-477.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/reconcileBalances.test.ts [2m ([22m[2m7 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/sponsorship.test.ts [2m ([22m[2m7 tests[22m[2m)[22m[90m 33[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/claimableBalanceSafety.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 62[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/property-based-transaction.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[33m 7451[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/e2e/wallet-connection-workflows.test.ts [2m ([22m[2m8 tests[22m[2m)[22m[33m 3057[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/invokeContract.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/issues-561-562-574.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/issues-464-475.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/issue-482-481-480-473.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/advanced-features.test.ts [2m ([22m[2m7 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+ [32mΓ£ô[39m src/integration/sep1Toml.test.ts [2m ([22m[2m6 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/submit-transaction.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[33m 1165[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/fallback.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32mΓ£ô[39m src/integration/sep10Auth.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 73[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/simulator.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/router-multi-hop.integration.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 48[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/strict-null-paths.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/refunds.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 67[2mms[22m[39m
+ [32mΓ£ô[39m src/account/healthScore.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/transaction/atomicOrchestrator.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 32[2mms[22m[39m
+[90mstdout[2m | tests/stress/concurrent.test.ts[2m > [22m[2mconcurrent SDK operations[2m > [22m[2mhandles 100+ mixed concurrent operations and reports performance[22m[39m
+stress metrics {"operations":205,"durationMs":2.373700000000099,"throughputPerSecond":86363.06188650269,"averageLatencyMs":1.1841302439024375,"errorRate":0,"memoryDeltaBytes":409512}
+
+ [32mΓ£ô[39m tests/stress/concurrent.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/signingRateLimiter.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 191[2mms[22m[39m
+ [32mΓ£ô[39m src/soroban/stateHistory.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/e2e/network-resilience-workflows.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 43[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/issues-563-567.test.ts [2m ([22m[2m9 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/integration/workflow.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 25[2mms[22m[39m
+ [32mΓ£ô[39m src/soroban/eventAnalytics.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 40[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/price-feeds.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/analyzeUnused.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 201[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/assetBridge.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/upgradeDetection.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/contract-event-filtering.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32mΓ£ô[39m src/utility/rateLimiter.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/issue-472-468.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/environment.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 131[2mms[22m[39m
+ [32mΓ£ô[39m src/soroban/resultDecoder.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32mΓ£ô[39m src/testing/mockAbstraction.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/integration/streaming.test.ts [2m ([22m[2m1 test[22m[2m)[22m[33m 1058[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/integration/contract.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 220[2mms[22m[39m
+[90mstderr[2m | src\tests\integration.test.ts:47:11[22m[39m
+Skipping testnet integration: set STELLAR_TESTNET_SOURCE_SECRET and 
+STELLAR_TESTNET_DESTINATION.
+
+ [32mΓ£ô[39m src/tests/endpointFailover.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [2m[90mΓåô[39m[22m src/tests/integration.test.ts [2m ([22m[2m1 test[22m [2m|[22m [33m1 skipped[39m[2m)[22m
+ [32mΓ£ô[39m src/tests/contract-event-decoding.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/compliance/auditTrail.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/subscriptions.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 28[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/factory-statistics.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/amounts.property.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/client-url-logging.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/integration/didSupport.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/router-errors.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+[90mstdout[2m | src/tests/devtoolsBridge.jsdom.test.ts[2m > [22m[2menableDevtoolsBridge[2m > [22m[2mstops dispatching events after the returned unsubscribe function is called[22m[39m
+[sorokit] {
+  timestamp: [32m'2026-10-15T04:08:54.875Z'[39m,
+  level: [32m'info'[39m,
+  module: [32m'core'[39m,
+  message: [32m'after.disable'[39m,
+  context: {}
+}
+
+ [32mΓ£ô[39m src/tests/devtoolsBridge.jsdom.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/tests/shared.jsdom.test.ts [2m ([22m[2m1 test[22m[2m)[22m[90m 3[2mms[22m[39m
+
+[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1m[7m Failed Tests 13 
+[27m[22mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/lazy/lazy.test.ts[2m > [22mnamed 
+loaders (pre-#682 API)[2m > [22mare re-exported from the root entry point
+[31m[1mAssertionError[22m: expected '/**\r\n * sorokit-core ΓÇö public 
+API\rΓÇª' to contain 'loadModule'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- loadModule[39m
+[31m+ /**
+[39m
+[31m+  * sorokit-core ΓÇö public API
+[39m
+[31m+  *
+[39m
+[31m+  * Single entry point: createSorokitClient()
+[39m
+[31m+  * All functionality is accessed through the returned client object.
+[39m
+[31m+  */
+[39m
+[31m+ 
+[39m
+[31m+ // ΓöÇΓöÇΓöÇ Entry point ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓ
+öÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓ
+öÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+[39m
+[31m+ export { createSorokitClient } from "./client/createSorokitClient";
+[39m
+[31m+ export {
+[39m
+[31m+   authenticateSep10,
+[39m
+[31m+   clearStellarTomlCache,
+[39m
+[31m+   clearFederationAddressCache,
+[39m
+[31m+   completeSep10Auth,
+[39m
+[31m+   deriveKey,
+[39m
+[31m+   fetchStellarToml,
+[39m
+[31m+   getSep6TransactionStatus,
+[39m
+[31m+   getKycFields,
+[39m
+[31m+   getKycStatus,
+[39m
+[31m+   initiateDeposit,
+[39m
+[31m+   initiateInteractiveDeposit,
+[39m
+[31m+   initiateInteractiveWithdraw,
+[39m
+[31m+   initiateSep10Auth,
+[39m
+[31m+   initiateSep6Transfer,
+[39m
+[31m+   initiateSep24Interactive,
+[39m
+[31m+   initiateWithdraw,
+[39m
+[31m+   monitorTransaction,
+[39m
+[31m+   quoteDirectPayment,
+[39m
+[31m+   resolveFederatedAddress,
+[39m
+[31m+   rotateSecretKey,
+[39m
+[31m+   sendDirectPayment,
+[39m
+[31m+   submitKycInfo,
+[39m
+[31m+   trackDirectPayment,
+[39m
+[31m+   trackTransaction,
+[39m
+[31m+   validateSecretKey,
+[39m
+[31m+   validateSep10Token,
+[39m
+[31m+   loadIntegration,
+[39m
+[31m+   loadKeyManagement,
+[39m
+[31m+   loadSoroban,
+[39m
+[31m+[39m
+
+[36m [2mΓ¥»[22m src/lazy/lazy.test.ts:[2m125:25[22m[39m
+    [90m123| [39m    [35mconst[39m lazyBlock [33m=[39m 
+rootSrc[33m.[39m[34mslice[39m([34m0[39m[33m,[39m 
+rootSrc[33m.[39m[34mindexOf[39m([32m'} from "./lazy[39mΓÇª
+    [90m124| [39m    [35mfor[39m ([35mconst[39m name [35mof[39m 
+[[32m"loadSoroban"[39m[33m,[39m [32m"loadModule"[39m[33m,[39m 
+[32m"preloadModules"[39m[33m,[39mΓÇª
+    [90m125| [39m      
+[34mexpect[39m(lazyBlock)[33m.[39m[34mtoContain[39m(name)[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m126| [39m    }
+    [90m127| [39m  })[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+[1/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/network/federationResolver.test.ts[2m 
+> [22mfederationResolver[2m > [22mFederationResolver[2m > [22mshould 
+enforce max cache size
+[31m[1mAssertionError[22m: expected 5 to be 2 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 5[39m
+
+[36m [2mΓ¥»[22m src/network/federationResolver.test.ts:[2m136:26[22m[39m
+    [90m134| [39m
+    [90m135| [39m      [35mconst[39m stats [33m=[39m 
+limitedResolver[33m.[39m[34mgetCacheStats[39m()[33m;[39m
+    [90m136| [39m      [34mexpect[39m(stats[33m.[39msize)[33m.[39m[34
+mtoBe[39m([34m2[39m)[33m;[39m
+    [90m   | [39m                         [31m^[39m
+    [90m137| [39m    })[33m;[39m
+    [90m138| [39m  })[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+[2/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/network/federationResolver.test.ts[2m 
+> [22mfederationResolver[2m > [22mverifyIdentity[2m > [22mshould return 
+verification result
+[31m[1mAssertionError[22m: expected 'error' to be 'ok' // Object.is 
+equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ok[39m
+[31m+ error[39m
+
+[36m [2mΓ¥»[22m src/network/federationResolver.test.ts:[2m173:29[22m[39m
+    [90m171| [39m      [90m// Since we can't actually fetch without a real 
+server,[39m
+    [90m172| [39m      [90m// we expect either verified: false or an 
+error[39m
+    [90m173| [39m      [34mexpect[39m(result[33m.[39mstatus)[33m.[39m
+[34mtoBe[39m([32m"ok"[39m)[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m174| [39m    })[33m;[39m
+    [90m175| [39m  })[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+[3/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/tests/didSupport.test.ts[2m > 
+[22mresolveDID[2m > [22mself-resolves a did:stellar DID when no resolver 
+is provided
+[31m[1mAssertionError[22m: expected undefined to be 
+'did:stellar:GAHJJJKMOKYE4RVPZEWZTKH5FΓÇª' // Object.is equality[39m
+
+[32m- Expected:[39m 
+"did:stellar:GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54LQL"
+
+[31m+ Received:[39m 
+undefined
+
+[36m [2mΓ¥»[22m src/tests/didSupport.test.ts:[2m212:28[22m[39m
+    [90m210| [39m    [35mif[39m (result[33m.[39mstatus [33m!==[39m 
+[32m"ok"[39m) [35mreturn[39m[33m;[39m
+    [90m211| [39m
+    [90m212| [39m    [34mexpect[39m(result[33m.[39mdata[33m.[39mid)[3
+3m.[39m[34mtoBe[39m([33mTEST_DID[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m213| [39m    [34mexpect[39m(result[33m.[39mdata[33m.[39mverifi
+cationMethod[[34m0[39m][33m.[39mpublicKeyMultibase)[33m.[39m[34mtoBe[3
+9m(ΓÇª
+    [90m214| [39m  })[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+[4/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/tests/didSupport.test.ts[2m > 
+[22mresolveDID[2m > [22mself-resolution produces a 
+StellarVerificationKey2024 method
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 
+'0')[39m
+[36m [2mΓ¥»[22m src/tests/didSupport.test.ts:[2m222:24[22m[39m
+    [90m220| [39m    [35mif[39m (result[33m.[39mstatus [33m!==[39m 
+[32m"ok"[39m) [35mreturn[39m[33m;[39m
+    [90m221| [39m
+    [90m222| [39m    [34mexpect[39m(result[33m.[39mdata[33m.[39mverifi
+cationMethod[[34m0[39m][33m.[39mtype)[33m.[39m[34mtoBe[39m([32m"Stell
+arVerifi[39mΓÇª
+    [90m   | [39m                       [31m^[39m
+    [90m223| [39m  })[33m;[39m
+    [90m224| [39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+[5/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/tests/didSupport.test.ts[2m > 
+[22mresolveDID[2m > [22mreturns the document from a custom resolver when 
+one is provided
+[31m[1mAssertionError[22m: expected { ΓÇª(3) } to deeply equal { 
+'@context': [ ΓÇª(2) ], ΓÇª(6) }[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  Object {[22m
+[31m+   "did": 
+"did:stellar:GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54LQL",[39m
+[31m+   "document": Object {[39m
+[2m      "@context": Array [[22m
+[2m        "https://www.w3.org/ns/did/v1",[22m
+[2m        "https://w3id.org/security/suites/ed25519-2020/v1",[22m
+[2m      ],[22m
+[2m      "assertionMethod": Array [[22m
+[2m        "did:stellar:GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54
+LQL#key-1",[22m
+[2m      ],[22m
+[2m      "authentication": Array [[22m
+[2m        "did:stellar:GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54
+LQL#key-1",[22m
+[2m      ],[22m
+[2m      "controller": 
+"did:stellar:GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54LQL",[22m
+[2m      "created": "2026-01-01T00:00:00.000Z",[22m
+[2m      "id": 
+"did:stellar:GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54LQL",[22m
+[2m      "verificationMethod": Array [[22m
+[2m        Object {[22m
+[2m          "controller": 
+"did:stellar:GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54LQL",[22m
+[2m          "id": "did:stellar:GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGB
+WE3BDE54LQL#key-1",[22m
+[2m          "publicKeyMultibase": 
+"GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54LQL",[22m
+[2m          "type": "StellarVerificationKey2024",[22m
+[2m        },[22m
+[2m      ],[22m
+[31m+   },[39m
+[31m+   "publicKey": 
+"GAHJJJKMOKYE4RVPZEWZTKH5FVI4PA3VL7GK2LFNUBSGBWE3BDE54LQL",[39m
+[2m  }[22m
+
+[36m [2mΓ¥»[22m src/tests/didSupport.test.ts:[2m231:25[22m[39m
+    [90m229| [39m    [35mif[39m (result[33m.[39mstatus [33m!==[39m 
+[32m"ok"[39m) [35mreturn[39m[33m;[39m
+    [90m230| [39m
+    [90m231| [39m    [34mexpect[39m(result[33m.[39mdata)[33m.[39m[34m
+toEqual[39m([33mPREBUILT_DOCUMENT[39m)[33m;[39m
+    [90m   | [39m                        [31m^[39m
+    [90m232| [39m  })[33m;[39m
+    [90m233| [39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+[6/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/tests/didSupport.test.ts[2m > 
+[22mresolveDID[2m > [22mreturns INVALID_CONFIG for a non-stellar DID 
+without a resolver
+[31m[1mAssertionError[22m: expected 'Invalid did:stellar identifier: 
+did:eΓÇª' to contain 'no resolver was provided'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- no resolver was provided[39m
+[31m+ Invalid did:stellar identifier: did:example:12345[39m
+
+[36m [2mΓ¥»[22m src/tests/didSupport.test.ts:[2m269:34[22m[39m
+    [90m267| [39m
+    [90m268| [39m    [34mexpect[39m(result[33m.[39merror[33m.[39mcode)
+[33m.[39m[34mtoBe[39m([32m"INVALID_CONFIG"[39m)[33m;[39m
+    [90m269| [39m    [34mexpect[39m(result[33m.[39merror[33m.[39mmessa
+ge)[33m.[39m[34mtoContain[39m([32m"no resolver was 
+provided"[39m)[33m;[39m
+    [90m   | [39m                                 [31m^[39m
+    [90m270| [39m  })[33m;[39m
+    [90m271| [39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+[7/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/tests/didSupport.test.ts[2m > 
+[22mverifyDIDOwnership[2m > [22mreturns verified=true for a valid proof 
+structure with a key in the document
+[31m[1mAssertionError[22m: expected false to be true // Object.is 
+equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2mΓ¥»[22m src/tests/didSupport.test.ts:[2m376:34[22m[39m
+    [90m374| [39m    [35mif[39m (result[33m.[39mstatus [33m!==[39m 
+[32m"ok"[39m) [35mreturn[39m[33m;[39m
+    [90m375| [39m
+    [90m376| [39m    [34mexpect[39m(result[33m.[39mdata[33m.[39mverifi
+ed)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                                 [31m^[39m
+    [90m377| [39m    [34mexpect[39m(result[33m.[39mdata[33m.[39mdid)[
+33m.[39m[34mtoBe[39m([33mTEST_DID[39m)[33m;[39m
+    [90m378| [39m    [34mexpect[39m(result[33m.[39mdata[33m.[39mpublic
+Key)[33m.[39m[34mtoBe[39m([33mTEST_KEY[39m)[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+[8/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/tests/didSupport.test.ts[2m > 
+[22mverifyDIDOwnership[2m > [22mreturns an error when proof.signature is 
+an empty string
+[31m[1mAssertionError[22m: expected 'Proof must include a signature' to 
+contain 'missing a signature'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- missing a signature[39m
+[31m+ Proof must include a signature[39m
+
+[36m [2mΓ¥»[22m src/tests/didSupport.test.ts:[2m398:34[22m[39m
+    [90m396| [39m
+    [90m397| [39m    [34mexpect[39m(result[33m.[39merror[33m.[39mcode)
+[33m.[39m[34mtoBe[39m([32m"INVALID_AUTH"[39m)[33m;[39m
+    [90m398| [39m    [34mexpect[39m(result[33m.[39merror[33m.[39mmessa
+ge)[33m.[39m[34mtoContain[39m([32m"missing a signature"[39m)[33m;[39m
+    [90m   | [39m                                 [31m^[39m
+    [90m399| [39m  })[33m;[39m
+    [90m400| [39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+[9/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/tests/wallet.test.ts[2m > [22mwallet 
+discovery (#wallet-discovery)[2m > [22mdiscoverWallet[2m > [22mresolves a 
+wallet address via federation
+[31m[1mAssertionError[22m: expected "spy" to be called with arguments: [ 
+StringContaining{ΓÇª}, Any<Object> ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  Array [[22m
+[32m-   StringContaining "stellar_address=alice%2Aexample.com",[90m
+[32m-   Any<Object>,[90m
+[31m+   "https://example.com/.well-known/stellar.toml",[90m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2mΓ¥»[22m src/tests/wallet.test.ts:[2m1821:23[22m[39m
+    [90m1819| [39m        [34mexpect[39m(result[33m.[39mdata[33m.[39ms
+ource)[33m.[39m[34mtoBe[39m([32m"federation"[39m)[33m;[39m
+    [90m1820| [39m      }
+    [90m1821| [39m      
+[34mexpect[39m(fetchFn)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+    [90m   | [39m                      [31m^[39m
+    [90m1822| [39m        expect[33m.[39m[34mstringContaining[39m([32m"
+stellar_address=alice%2Aexample.com"[39m)[33m,[39m
+    [90m1823| [39m        
+expect[33m.[39m[34many[39m([33mObject[39m)[33m,[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[10
+/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/tests/wallet.test.ts[2m > [22mwallet 
+discovery (#wallet-discovery)[2m > [22mdiscoverWallet[2m > [22mfalls back 
+to stellar.toml when federation returns no account
+[31m[1mAssertionError[22m: expected 'error' to be 'ok' // Object.is 
+equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ok[39m
+[31m+ error[39m
+
+[36m [2mΓ¥»[22m src/tests/wallet.test.ts:[2m1846:29[22m[39m
+    [90m1844| [39m      [35mconst[39m result [33m=[39m [35mawait[39m 
+[34mdiscoverWallet[39m([32m"example.com"[39m[33m,[39m 
+[32m"alice"[39m[33m,[39m { feΓÇª
+    [90m1845| [39m
+    [90m1846| [39m      [34mexpect[39m(result[33m.[39mstatus)[33m.[39m
+[34mtoBe[39m([32m"ok"[39m)[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m1847| [39m      [35mif[39m (result[33m.[39mstatus [33m===[39m 
+[32m"ok"[39m) {
+    [90m1848| [39m        [34mexpect[39m(result[33m.[39mdata[33m.[39ma
+ddress)[33m.[39m[34mtoBe[39m([33mACCOUNT_B[39m)[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[11
+/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/tests/wallet.test.ts[2m > [22mwallet 
+discovery (#wallet-discovery)[2m > [22mdiscoverWallet[2m > [22mreturns 
+WALLET_NOT_FOUND when both federation and stellar.toml fail
+[31m[1mAssertionError[22m: expected 'NETWORK_ERROR' to be 
+'WALLET_NOT_FOUND' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- WALLET_NOT_FOUND[39m
+[31m+ NETWORK_ERROR[39m
+
+[36m [2mΓ¥»[22m src/tests/wallet.test.ts:[2m1865:35[22m[39m
+    [90m1863| [39m      [34mexpect[39m(result[33m.[39mstatus)[33m.[39m
+[34mtoBe[39m([32m"error"[39m)[33m;[39m
+    [90m1864| [39m      [35mif[39m (result[33m.[39mstatus [33m===[39m 
+[32m"error"[39m) {
+    [90m1865| [39m        [34mexpect[39m(result[33m.[39merror[33m.[39m
+code)[33m.[39m[34mtoBe[39m([33mSorokitErrorCode[39m[33m.[39m[33mWALLE
+T_NOT_FOU[39mΓÇª
+    [90m   | [39m                                  [31m^[39m
+    [90m1866| [39m      }
+    [90m1867| [39m    })[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[12
+/13]ΓÄ»[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/tests/wallet.test.ts[2m > [22mwallet 
+discovery (#wallet-discovery)[2m > [22mdiscoverWallet[2m > [22mreturns 
+WALLET_NOT_FOUND when fetch throws a network error
+[31m[1mAssertionError[22m: expected 'NETWORK_ERROR' to be 
+'WALLET_NOT_FOUND' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- WALLET_NOT_FOUND[39m
+[31m+ NETWORK_ERROR[39m
+
+[36m [2mΓ¥»[22m src/tests/wallet.test.ts:[2m1878:35[22m[39m
+    [90m1876| [39m      [34mexpect[39m(result[33m.[39mstatus)[33m.[39m
+[34mtoBe[39m([32m"error"[39m)[33m;[39m
+    [90m1877| [39m      [35mif[39m (result[33m.[39mstatus [33m===[39m 
+[32m"error"[39m) {
+    [90m1878| [39m        [34mexpect[39m(result[33m.[39merror[33m.[39m
+code)[33m.[39m[34mtoBe[39m([33mSorokitErrorCode[39m[33m.[39m[33mWALLE
+T_NOT_FOU[39mΓÇª
+    [90m   | [39m                                  [31m^[39m
+    [90m1879| [39m      }
+    [90m1880| [39m    })[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[13
+/13]ΓÄ»[22m[39m
+
+[2m Test Files [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m162 passed[39m[22m[2m | [22m[33m3 skipped[39m[90m (169)[39m
+[2m      Tests [22m [1m[31m13 failed[39m[22m[2m | [22m[1m[32m3218 passed[39m[22m[2m | [22m[33m80 skipped[39m[90m (3311)[39m
+[2m   Start at [22m 05:08:22
+[2m   Duration [22m 31.98s[2m (transform 13.28s, setup 27ms, collect 134.89s, tests 58.12s, environment 2.40s, prepare 69.60s)[22m
+

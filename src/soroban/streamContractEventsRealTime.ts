@@ -150,15 +150,35 @@ export function streamContractEventsRealTime(
     scheduleNext();
   };
 
-  scheduleNext();
-
-  return {
-    stop(): void {
-      active = false;
-      if (timer !== undefined) {
-        clearTimeout(timer);
-        timer = undefined;
-      }
-    },
-  };
+      const delay = computeBackoffDelay(consecutiveFailures - 1, {
+        ...(options.backoffInitialMs !== undefined && {
+          initialDelayMs: options.backoffInitialMs,
+        }),
+        ...(options.backoffMaxMs !== undefined && {
+          maxDelayMs: options.backoffMaxMs,
+        }),
+        ...(options.backoffFactor !== undefined && {
+          factor: options.backoffFactor,
+        }),
+        ...(options.jitter !== undefined && { jitter: options.jitter }),
+      });
+      await new Promise<void>((resolve) => {
+        const timer = setTimeout(() => {
+          options.signal?.removeEventListener("abort", onAbort);
+          resolve();
+        }, delay);
+        const onAbort = (): void => {
+          clearTimeout(timer);
+          resolve();
+        };
+        if (options.signal?.aborted) {
+          clearTimeout(timer);
+          resolve();
+          return;
+        }
+        options.signal?.addEventListener("abort", onAbort, { once: true });
+      });
+    }
+  }
+  // EventIndex is GC'd with the generator scope; nothing retained (#707).
 }

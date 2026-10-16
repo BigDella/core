@@ -1,3 +1,5 @@
+import { xdr } from "@stellar/stellar-sdk";
+
 export interface ContractStorageEntry {
   key: unknown;
   value: unknown;
@@ -38,7 +40,39 @@ export interface StorageAnalysisReport {
   recommendations: StorageRecommendation[];
 }
 
+interface XdrSerializable {
+  toXDR: (format?: "raw" | "hex" | "base64") => Buffer | string;
+}
+
+/**
+ * True for `xdr.ScVal` (and compatible duck-typed XDR values). Soroban storage
+ * values are XDR-encoded, not plain JSON, so they must be serialized with the
+ * SDK's `.toXDR()` rather than `JSON.stringify` (which yields `{}` for class
+ * instances and hides real byte sizes).
+ */
+function isXdrValue(value: unknown): value is XdrSerializable {
+  if (value instanceof xdr.ScVal) return true;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { toXDR?: unknown }).toXDR === "function" &&
+    typeof (value as { switch?: unknown }).switch === "function"
+  );
+}
+
+function xdrFingerprint(value: XdrSerializable): string {
+  const encoded = value.toXDR();
+  return typeof encoded === "string" ? encoded : Buffer.from(encoded).toString("base64");
+}
+
+function xdrByteLength(value: XdrSerializable): number {
+  const encoded = value.toXDR();
+  return typeof encoded === "string" ? Buffer.from(encoded, "base64").byteLength : encoded.byteLength;
+}
+
 function stableSerialize(value: unknown): string {
+  if (isXdrValue(value)) return JSON.stringify(`scval:${xdrFingerprint(value)}`);
+  if (value instanceof Uint8Array) return JSON.stringify(`bytes:${Buffer.from(value).toString("base64")}`);
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stableSerialize).join(",")}]`;
   const record = value as Record<string, unknown>;
@@ -46,6 +80,8 @@ function stableSerialize(value: unknown): string {
 }
 
 function encodedSize(value: unknown): number {
+  if (isXdrValue(value)) return xdrByteLength(value);
+  if (value instanceof Uint8Array) return value.byteLength;
   return new TextEncoder().encode(stableSerialize(value)).byteLength;
 }
 

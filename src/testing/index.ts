@@ -2,8 +2,10 @@
  * sorokit-core/testing — test utilities for consumers.
  *
  * Import from "@sorokit/core/testing" in your test files.
- * Do NOT import this in production code — it depends on vitest.
+ * Do NOT import this in production code - it depends on a test runner.
  */
+export { createMockFunction, spyOn } from "./mockAbstraction";
+export type { MockFunction } from "./mockAbstraction";
 export {
   createMockClient,
   createMockWalletAdapter,
@@ -19,5 +21,5 @@ export {
   MOCK_CONTRACT_CALL_RESULT,
 } from "./mockClient";
 export type { MockClientConfig } from "./mockClient";
-export { createMockContractEventGenerator, createMockEventStream } from "./mockEventStream";
-export type { MockContractEventGeneratorOptions, MockEventStreamOptions } from "./mockEventStream";
+export { setupMockServer, teardownMockServer, setupMockServerScenario } from "./mockServer";
+export type { MockServerScenario, MockServerOptions } from "./mockServer";

@@ -67,6 +67,7 @@ export enum SorokitErrorCode {
   TX_BUILD_FAILED = "TX_BUILD_FAILED",
   TX_SIMULATE_FAILED = "TX_SIMULATE_FAILED",
   TX_SUBMIT_FAILED = "TX_SUBMIT_FAILED",
+  INVALID_TRANSACTION = "INVALID_TRANSACTION",
   TX_FETCH_FAILED = "TX_FETCH_FAILED",
   TX_NOT_FOUND = "TX_NOT_FOUND",
   TX_SEQUENCE_CONFLICT = "TX_SEQUENCE_CONFLICT",
@@ -78,12 +79,19 @@ export enum SorokitErrorCode {
   CONTRACT_READ_FAILED = "CONTRACT_READ_FAILED",
   CONTRACT_PREPARE_FAILED = "CONTRACT_PREPARE_FAILED",
   CONTRACT_SIMULATE_FAILED = "CONTRACT_SIMULATE_FAILED",
+  SOROBAN_SIMULATION_FAILED = "SOROBAN_SIMULATION_FAILED",
+  INSUFFICIENT_FEE = "INSUFFICIENT_FEE",
+  INVALID_AUTH = "INVALID_AUTH",
+  RESOURCE_LIMIT_EXCEEDED = "RESOURCE_LIMIT_EXCEEDED",
+  XDR_INVALID = "XDR_INVALID",
+  RATE_LIMITED = "RATE_LIMITED",
   NETWORK_ERROR = "NETWORK_ERROR",
   INVALID_NETWORK = "INVALID_NETWORK",
   SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE",
   OPERATION_TIMEOUT = "OPERATION_TIMEOUT",
   INVALID_CONFIG = "INVALID_CONFIG",
   INVALID_ADDRESS = "INVALID_ADDRESS",
+  MAINNET_SAFETY_LIMIT = "MAINNET_SAFETY_LIMIT",
   VALIDATION = "VALIDATION",
   INTERNAL = "INTERNAL",
   UNKNOWN = "UNKNOWN",
@@ -125,7 +133,9 @@ export function sanitizeErrorContext(
 export function classifyError(code: SorokitErrorCode): SorokitErrorCategory {
   if (
     code === SorokitErrorCode.INVALID_CONFIG ||
-    code === SorokitErrorCode.INVALID_ADDRESS
+    code === SorokitErrorCode.INVALID_ADDRESS ||
+    code === SorokitErrorCode.MAINNET_SAFETY_LIMIT ||
+    code === SorokitErrorCode.VALIDATION
   ) {
     return SorokitErrorCategory.VALIDATION;
   }
@@ -140,9 +150,21 @@ export function classifyError(code: SorokitErrorCode): SorokitErrorCategory {
   ) {
     return SorokitErrorCategory.NETWORK;
   }
-  if (code.startsWith("CONTRACT")) return SorokitErrorCategory.CONTRACT;
+  if (
+    code.startsWith("CONTRACT") ||
+    code === SorokitErrorCode.SOROBAN_SIMULATION_FAILED ||
+    code === SorokitErrorCode.INSUFFICIENT_FEE ||
+    code === SorokitErrorCode.INVALID_AUTH ||
+    code === SorokitErrorCode.RESOURCE_LIMIT_EXCEEDED ||
+    code === SorokitErrorCode.XDR_INVALID
+  ) return SorokitErrorCategory.CONTRACT;
+  if (code === SorokitErrorCode.RATE_LIMITED) return SorokitErrorCategory.NETWORK;
   if (code.startsWith("WALLET")) return SorokitErrorCategory.WALLET;
-  if (code.startsWith("TX_") || code.startsWith("ROUTER_"))
+  if (
+    code === SorokitErrorCode.INVALID_TRANSACTION ||
+    code.startsWith("TX_") ||
+    code.startsWith("ROUTER_")
+  )
     return SorokitErrorCategory.TRANSACTION;
   if (code.startsWith("ACCOUNT")) return SorokitErrorCategory.INTERNAL;
   return SorokitErrorCategory.UNKNOWN;
