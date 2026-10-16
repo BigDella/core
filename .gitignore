@@ -5,3 +5,6 @@ dist/
 *.tsbuildinfo
 coverage/
 .DS_Store
+.agents/
+scripts/
+.eslintrc.json
