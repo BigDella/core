@@ -763,30 +763,6 @@ export type {
   CustomValidationRule,
   ParsedOperation,
 } from "./transaction/validateTransaction";
-export {
-  submitBatch,
-  wasAtomicExecuted,
-  suggestRetryStrategy,
-  generateRollbackInstructions,
-} from "./transaction";
-export type {
-  BatchConfig,
-  BatchSubmissionResult,
-  BatchTransactionStatus,
-  BatchTransactionStatusCode,
-  RetryStrategy,
-  RollbackInstruction,
-} from "./transaction";
-export {
-  buildTimeLockTransaction,
-  validateTimeBounds,
-  getTimeLockedTransactionStatus,
-} from "./transaction";
-export type {
-  TimeBounds,
-  TimeLockExecutionStatus,
-  TimeLockTransactionOptions,
-} from "./transaction";
 export { validateTransactionOffline } from "./transaction/validateTransactionOffline";
 export type {
   OfflineValidationIssue,
