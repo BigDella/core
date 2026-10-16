@@ -17,10 +17,7 @@ import type { SorokitResult } from "../shared/response";
 import type { SorokitCache } from "../shared/cache";
 import { DEFAULT_CONTRACT_METADATA_TTL_MS } from "../shared/constants";
 import { toMessage } from "../shared";
-import {
-  fetchContractWasm,
-  readWasmCustomSections,
-} from "./contractMetadata";
+import { fetchContractWasm, readWasmCustomSections } from "./contractMetadata";
 
 const CONTRACT_META_SECTION_NAME = "contractmetav0";
 const VERSION_META_KEY = "version";
@@ -78,6 +75,7 @@ const versionMemoryCache = new Map<string, VersionCacheEntry>();
 const observedVersions = new Map<string, ObservedVersionEntry>();
 const versionHistory = new Map<string, ContractVersionHistoryEntry[]>();
 const MAX_MEMORY_CACHE_ENTRIES = 100;
+const MAX_VERSION_HISTORY_ENTRIES = 100;
 
 function versionCacheKey(contractId: string): string {
   return `sorokit:contract-version:${contractId}`;
@@ -251,7 +249,7 @@ export async function getContractVersion(
  * `onContractUpgrade` exactly once per actual change. Missing metadata never
  * overwrites or erases a previously observed version.
  */
-function recordObservation(
+export function recordObservation(
   contractId: string,
   currentVersion: string | null,
   options?: ContractVersionOptions,
@@ -265,13 +263,19 @@ function recordObservation(
 
   setObservedVersion(contractId, currentVersion, options?.cache);
 
-  // Record version history
-  const history = versionHistory.get(contractId) ?? [];
+  // Record version history with cap enforcement
+  let history = versionHistory.get(contractId) ?? [];
   history.push({
     version: currentVersion,
     observedAt: new Date().toISOString(),
     isUpgrade: previous !== undefined && previous !== null,
   });
+
+  // Enforce cap: drop oldest entries (FIFO) when limit exceeded
+  if (history.length > MAX_VERSION_HISTORY_ENTRIES) {
+    history = history.slice(history.length - MAX_VERSION_HISTORY_ENTRIES);
+  }
+
   versionHistory.set(contractId, history);
 
   if (
