@@ -26,11 +26,15 @@ export class LocalStorageCursorStore implements CursorStore {
     if (storage === null || storage === undefined) {
       throw new Error("LocalStorageCursorStore requires a Storage implementation: localStorage is unavailable in this environment. Pass a Storage instance explicitly, or use createCursorStore() / MemoryCursorStore instead.");
     }
-    for (const method of ["getItem", "setItem", "removeItem"] as const) {
+    for (const method of ["getItem", "setItem", "removeItem", "key"] as const) {
       const candidate: unknown = storage[method];
       if (typeof candidate !== "function") {
         throw new Error(`LocalStorageCursorStore requires a Storage implementation exposing ${method}(); received ${typeof candidate}.`);
       }
+    }
+    const length: unknown = storage.length;
+    if (typeof length !== "number" || !Number.isFinite(length) || length < 0) {
+      throw new Error(`LocalStorageCursorStore requires a Storage implementation whose length is a finite, non-negative number; received ${typeof length} ${String(length)}.`);
     }
     this.storage = storage;
   }
