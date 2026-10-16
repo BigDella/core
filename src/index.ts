@@ -7,11 +7,88 @@
 
 // ─── Entry point ──────────────────────────────────────────────────────────────
 export { createSorokitClient } from "./client/createSorokitClient";
+export {
+  authenticateSep10,
+  clearStellarTomlCache,
+  clearFederationAddressCache,
+  completeSep10Auth,
+  deriveKey,
+  fetchStellarToml,
+  getSep6TransactionStatus,
+  getKycFields,
+  getKycStatus,
+  initiateDeposit,
+  initiateInteractiveDeposit,
+  initiateInteractiveWithdraw,
+  initiateSep10Auth,
+  initiateSep6Transfer,
+  initiateSep24Interactive,
+  initiateWithdraw,
+  monitorTransaction,
+  quoteDirectPayment,
+  resolveFederatedAddress,
+  rotateSecretKey,
+  sendDirectPayment,
+  submitKycInfo,
+  trackDirectPayment,
+  trackTransaction,
+  validateSecretKey,
+  validateSep10Token,
+  loadIntegration,
+  loadKeyManagement,
+  loadSoroban,
+  loadModule,
+  preloadModules,
+  isModuleLoaded,
+  getLoadedModules,
+  LAZY_MODULES,
+  loadGovernance,
+} from "./lazy";
+export type {
+  AnchorAsset,
+  AnchorRequestOptions,
+  AuthToken,
+  DerivedStellarKey,
+  DirectPaymentAsset,
+  DirectPaymentQuoteRequestOptions,
+  DirectPaymentReceiver,
+  FetchStellarTomlOptions,
+  FederationResolverOptions,
+  InitiateSep10AuthOptions,
+  KycFieldDefinition,
+  KycRequestOptions,
+  KycSubmissionInfo,
+  ResolvedAddress,
+  RotateSecretKeyOptions,
+  Sep10AuthOptions,
+  Sep24FlowAsset,
+  Sep24FlowRequestOptions,
+  Sep24InteractiveResult,
+  Sep6FlowAsset,
+  Sep6FlowRequestOptions,
+  StellarToml,
+} from "./integration";
 export type {
   SorokitClient,
   SorokitClientConfig,
   HealthCheckReport,
 } from "./client/createSorokitClient";
+
+// ─── Wallet discovery & account linking ───────────────────────────────────────
+export {
+  discoverWallet,
+  listLinkedAccounts,
+  linkWallet,
+  unlinkWallet,
+  clearLinkedAccounts,
+} from "./wallet/discovery";
+export type {
+  DiscoveryData,
+  LinkedAccount,
+  DiscoverWalletOptions,
+  ListLinkedAccountsOptions,
+  LinkWalletOptions,
+} from "./wallet/discovery";
 
 // ─── Wallet adapters ──────────────────────────────────────────────────────────
 export {
@@ -31,6 +108,21 @@ export {
   generateDeviceFingerprint,
   evaluateDeviceTrust,
   DEFAULT_TRUST_THRESHOLD,
+  WalletAccountManager,
+  createAccountManager,
+  InMemoryAccountStorage,
+  createLocalStorageAccountStorage,
+  saveSession,
+  restoreSession,
+  clearSession,
+  isSessionValid,
+  saveWalletSession,
+  loadWalletSession,
+  clearWalletSession,
+  DEFAULT_SESSION_KEY,
+  DEFAULT_SESSION_TTL_MS,
+  encryptSessionPayload,
+  decryptSessionPayload,
 } from "./wallet";
 export type {
   CreateSigningChallengeOptions,
@@ -40,6 +132,15 @@ export type {
   SignatureHintInput,
   SigningChallenge,
   SigningDelegationSignature,
+  AccountData,
+  AccountMetadata as WalletAccountMetadata,
+  AccountSwitchListener,
+  AccountSwitchUnsubscribe,
+  AccountStorageAdapter,
+  SessionData,
+  WalletConnection,
+  SessionPersistenceOptions,
+  EncryptedSessionPayload,
 } from "./wallet";
 export {
   discoverHardwareWallets,
@@ -55,7 +156,13 @@ export {
   FreighterAdapter,
   LobstrAdapter,
   XBullAdapter,
+  HanaAdapter,
+  AlbedoAdapter,
+  RabetAdapter,
+  WalletConnectAdapter,
 } from "./wallet/adapters";
+export type { WalletConnectAdapterConfig } from "./wallet/adapters";
+export type { RabetProvider } from "./wallet/adapters";
 
 // ─── Wallet types ─────────────────────────────────────────────────────────────
 export { WalletType } from "./wallet/types";
@@ -76,7 +183,13 @@ export type {
   WalletCapabilitySource,
   WalletCapabilities,
 } from "./wallet/types";
-export type { DeviceSignals, DeviceFingerprint, TrustHistoryEntry, TrustScoreOptions, TrustEvaluation } from "./wallet/deviceTrust";
+export type {
+  DeviceSignals,
+  DeviceFingerprint,
+  TrustHistoryEntry,
+  TrustScoreOptions,
+  TrustEvaluation,
+} from "./wallet/deviceTrust";
 
 // ─── Wallet Status Tracker ─────────────────────────────────────────────────────
 export {
@@ -142,11 +255,31 @@ export type {
 } from "./shared/types";
 export {
   checkNetworkHealth,
+  AdaptiveRateLimiter,
+  adaptiveRateLimiter,
+  parseRetryAfter,
   NetworkSwitcher,
   getNetwork,
   setNetwork,
   NETWORK_DEFAULTS,
+  ConnectionPool,
+  createConnectionPool,
 } from "./network";
+export type {
+  AdaptiveRateLimiterOptions,
+  RateLimitState,
+  RateLimitedResponse,
+} from "./network";
+export {
+  MemoryCursorStore,
+  LocalStorageCursorStore,
+  PersistentEventDeduplicationStore,
+  createCursorStore,
+} from "./streaming/cursorStore";
+export type {
+  CursorStore,
+  EventDeduplicationStore,
+} from "./streaming/cursorStore";
 export type {
   CheckNetworkHealthOptions,
   NetworkEndpointHealth,
@@ -160,7 +293,10 @@ export type {
   NetworkStatusListener,
   NetworkSwitchUnsubscribe,
   NetworkSwitcherConfig,
+  ConnectionPoolConfig,
+  ConnectionPoolStats,
 } from "./network";
+export { setConnectionPool, getConnectionPool } from "./shared/serverFactory";
 
 // ─── Circuit breaker (#186) ────────────────────────────────────────────────────
 export {
@@ -219,6 +355,15 @@ export type {
 } from "./account/types";
 // Standalone account functions for use without a client instance
 export { getAccount } from "./account/getAccount";
+export { getOffers, getTrades } from "./account/dexActivity";
+export type {
+  DexActivityOptions,
+  DexActivityResult,
+  DexAsset,
+  DexAssetAmount,
+  OfferInfo,
+  TradeInfo,
+} from "./account/dexActivity";
 export { getBalances } from "./account/getBalances";
 export { getAssetBalances } from "./account/getAssetBalances";
 export {
@@ -322,13 +467,64 @@ export type {
   MultiSigEnvelopeParams,
   MultiSigEnvelope,
 } from "./transaction/types";
-export {
-  verifyTransactionSignatures,
-} from "./transaction/witnessValidation";
+export { verifyTransactionSignatures } from "./transaction/witnessValidation";
 export type {
   SignatureValidationResult,
   WitnessValidationResult,
 } from "./transaction/witnessValidation";
+
+// ─── Transaction signing coordination (#586) ──────────────────────────────────
+export {
+  createSigningRequest,
+  addSignature,
+  isComplete,
+  getSigningStatus,
+  serializeSigningRequest,
+  deserializeSigningRequest,
+} from "./transaction/signingCoordinator";
+export type {
+  SigningRequest,
+  SigningStatus,
+} from "./transaction/signingCoordinator";
+
+// ─── Time-locked transaction scheduling (#587) ────────────────────────────────
+export {
+  buildTimeLockTransaction,
+  getTimeLockedTransactionStatus,
+  validateTimeBounds,
+} from "./transaction/timeLocks";
+export type {
+  TimeBounds,
+  TimeLockExecutionStatus,
+} from "./transaction/timeLocks";
+
+// ─── Transaction cost forecasting (#588) ──────────────────────────────────────
+export {
+  forecastTransactionCost,
+  compareCosts,
+  suggestOptimization,
+  analyzeBatchCost,
+} from "./transaction/costForecasting";
+export type {
+  CostForecast as TransactionCostForecast,
+  CostComparison,
+  OptimizationSuggestion,
+} from "./transaction/costForecasting";
+
+// ─── Batch transaction submission (#589) ──────────────────────────────────────
+export {
+  submitBatch,
+  getTransactionStatus as getBatchTransactionStatus,
+  generateRollbackInstructions,
+  wasAtomicExecuted,
+  suggestRetryStrategy,
+} from "./transaction/batchSubmitter";
+export type {
+  TransactionBatchStatus,
+  BatchTransactionStatus,
+  BatchSubmissionOptions,
+  BatchSubmissionResult,
+} from "./transaction/batchSubmitter";
 
 // ─── Transaction types ────────────────────────────────────────────────────────
 export type {
@@ -376,6 +572,10 @@ export type {
   SplitPaymentOptions,
 } from "./transaction/pathPayment";
 export { streamTransactions } from "./transaction/streamTransactions";
+export {
+  streamTransactionsSSE,
+  buildTransactionSSEUrl,
+} from "./transaction/streamTransactionsSSE";
 export {
   buildPathPayment,
   checkTrustlines,
@@ -425,8 +625,24 @@ export type {
 
 // ─── Fee-bump transactions (#398) ─────────────────────────────────────────────
 export { buildFeeBumpTransaction } from "./transaction/feeBumpTransaction";
-export { buildEscrowTransaction, validateEscrow, validateEscrowAction, createEscrowRelease, createEscrowRefund, createEscrowDispute, isEscrowExpired, calculateAdaptiveFee } from "./transaction";
-export type { EscrowAction, EscrowState, EscrowTiming, EscrowParams, EscrowValidation, AdaptiveFeeOptions } from "./transaction";
+export {
+  buildEscrowTransaction,
+  validateEscrow,
+  validateEscrowAction,
+  createEscrowRelease,
+  createEscrowRefund,
+  createEscrowDispute,
+  isEscrowExpired,
+  calculateAdaptiveFee,
+} from "./transaction";
+export type {
+  EscrowAction,
+  EscrowState,
+  EscrowTiming,
+  EscrowParams,
+  EscrowValidation,
+  AdaptiveFeeOptions,
+} from "./transaction";
 
 // ─── Webhook support (#395) ───────────────────────────────────────────────────
 export {
@@ -537,7 +753,10 @@ export {
   resetPairRegistry,
 } from "./transaction/assetPairs";
 export type { AssetPair, PairPrice } from "./transaction/assetPairs";
-export { validateTransaction, validateTransactionBatch } from "./transaction/validateTransaction";
+export {
+  validateTransaction,
+  validateTransactionBatch,
+} from "./transaction/validateTransaction";
 export type {
   ValidationIssue,
   TransactionValidationContext,
@@ -589,8 +808,24 @@ export type {
   TemplateParamValue,
 } from "./transaction";
 // Standalone transaction functions for use without a client instance
-export { submitTransaction } from "./transaction/submitTransaction";
+export {
+  submitTransaction,
+  clearReplayProtection,
+  getReplayProtectionStats,
+} from "./transaction/submitTransaction";
+export type { ReplayProtectionStats } from "./transaction/submitTransaction";
+export {
+  checkMainnetSafety,
+  extractTransactionTotalXlm,
+  isMainnetNetwork,
+  DEFAULT_MAINNET_SAFETY_THRESHOLD_XLM,
+  MAINNET_NETWORK_PASSPHRASE,
+} from "./shared/mainnetSafety";
+export type { MainnetSafetyOptions } from "./shared/mainnetSafety";
 export { getTransactionStatus } from "./transaction/status";
+export { buildSetOptionsTransaction } from "./transaction/setOptions";
+export { buildAtomicSwap } from "./transaction/atomicSwap";
+export type { SetOptionsParams } from "./transaction/types";
 
 // ─── Claimable balances (#543) ─────────────────────────────────────────────────
 export {
@@ -620,7 +855,6 @@ export {
 export type { BumpSequenceParams } from "./transaction/types";
 
 // ─── Fluent multi-operation builder (#542) ────────────────────────────────────
-export { compose } from "./transaction/compose";
 export type {
   ComposeBuilder,
   ComposeOptions,
@@ -665,6 +899,14 @@ export {
   serializeCustomType,
 } from "./soroban/contractEncoding";
 export { validateContractData } from "./soroban";
+export {
+  classifySorobanRpcError,
+  extractRpcErrorMessage,
+  mapSorobanRpcError,
+  mapSorobanRpcResult,
+  mapRpcError,
+} from "./soroban/rpcErrorMapper";
+export type { SorobanRpcErrorPayload } from "./soroban/rpcErrorMapper";
 export type {
   ContractDataType,
   ContractDataValidationIssue,
@@ -745,9 +987,7 @@ export type {
   BuilderStateListener,
   BuilderStateUnsubscribe,
 } from "./soroban";
-export {
-  invokeContract,
-} from "./soroban/invokeContract";
+export { invokeContract } from "./soroban/invokeContract";
 export type { InvokeContractOptions } from "./soroban/invokeContract";
 export {
   withExecutionPolicy,
@@ -769,6 +1009,43 @@ export type {
   ContractAuditFilter,
   ContractAuditStatus,
 } from "./soroban/contractAuditTrail";
+// ─── Contract dependency resolution (#498) ─────────────────────────────────────
+export {
+  ContractDependencyResolver,
+  createDependencyResolver,
+  getDefaultResolver,
+  parseVersionConstraint,
+  satisfiesVersion,
+} from "./soroban/contractDependencyResolver";
+export type {
+  ContractDependency,
+  ContractMetadata,
+  DependencyNode,
+  DependencyGraph,
+  VersionConflict,
+  ResolutionResult,
+  VersionConstraint,
+  DependencyResolverConfig,
+} from "./soroban/contractDependencyResolver";
+// ─── Contract storage migration (#519) ────────────────────────────────────────
+export {
+  StorageMigrationManager,
+  createStorageMigrationManager,
+  getDefaultStorageMigrationManager,
+  registerStorageMigration,
+  applyStorageMigration,
+  rollbackStorageMigration,
+  getStorageMigrationStatus,
+  listStorageMigrations,
+} from "./soroban/storageMigration";
+export type {
+  StorageVersion,
+  StorageMigration,
+  MigrationStatus,
+  MigrationResult,
+  MigrationRegistry,
+  MigrationConfig,
+} from "./soroban/storageMigration";
 export { buildContractDeploy } from "./soroban/deployContract";
 export {
   validateDeployConfig,
@@ -826,8 +1103,14 @@ export type {
   ContractStateDiff,
   ContractStateReader,
 } from "./soroban/stateSnapshots";
-export { optimizeContractArgs, analyzeArgumentEncoding } from "./soroban/optimizeArgs";
-export type { ArgumentEncodingStats, OptimizedContractArgs } from "./soroban/optimizeArgs";
+export {
+  optimizeContractArgs,
+  analyzeArgumentEncoding,
+} from "./soroban/optimizeArgs";
+export type {
+  ArgumentEncodingStats,
+  OptimizedContractArgs,
+} from "./soroban/optimizeArgs";
 export {
   createClaimCommitment,
   createProofEnvelope,
@@ -952,10 +1235,47 @@ export type {
 } from "./account/attestationTypes";
 
 export { SDK_VERSION } from "./shared/constants";
-export { createI18n, translateMessage, localizeError, DEFAULT_LOCALE, EN_TRANSLATIONS, ES_TRANSLATIONS } from "./shared/i18n";
-export type { I18n, I18nConfig, MessageKey, TranslationCatalog, TranslationMap, LocalizedError, SupportedLocale } from "./shared/i18n";
+export {
+  createI18n,
+  translateMessage,
+  localizeError,
+  DEFAULT_LOCALE,
+  EN_TRANSLATIONS,
+  ES_TRANSLATIONS,
+} from "./shared/i18n";
+export type {
+  I18n,
+  I18nConfig,
+  MessageKey,
+  TranslationCatalog,
+  TranslationMap,
+  LocalizedError,
+  SupportedLocale,
+} from "./shared/i18n";
 export type { SorokitCache } from "./shared/cache";
 export { createInMemoryCache, invalidateContractState } from "./shared/cache";
+
+// ─── Cache invalidation and TTL management (#597) ───────────────────────────────
+export {
+  CacheInvalidationManager,
+  createCacheInvalidationManager,
+  calculateAdaptiveTtl,
+  getBaseTtl,
+  getAffectedCacheKeys,
+  invalidateAccountCachesForTransaction,
+  createInvalidationPattern,
+} from "./shared/cacheInvalidation";
+export type {
+  InvalidationStrategy,
+  InvalidationStrategyConfig,
+  DataType,
+  CacheKeyMapping,
+  StateModifyingOperation,
+  HorizonInvalidationEvent,
+  CacheInvalidationConfig,
+  InvalidationStats,
+} from "./shared/cacheInvalidation";
+
 export { createTracedLogger } from "./shared/logger";
 export type { LogLevel, LoggerOptions, SorokitLogger } from "./shared/logger";
 export {
@@ -999,14 +1319,39 @@ export type {
 } from "./shared/utils";
 
 // ─── Token validation utilities (#352) ────────────────────────────────────────
+// validateAssetCode and validateAssetIssuer are re-exported from the centralised
+// validation module below (they supersede the void-returning variants here).
 export {
-  validateAssetCode,
-  validateAssetIssuer,
   validateTokenAsset,
   isSameAsset,
   normalizePairId,
 } from "./shared/validateToken";
 export type { TokenAsset } from "./shared/validateToken";
+
+// ─── Amount formatting (#616) ──────────────────────────────────────────────
+export { formatAmount, DEFAULT_ASSET_DECIMALS } from "./shared/amountFormatter";
+export type { FormatAmountOptions } from "./shared/amountFormatter";
+
+// ─── Asset registry (#614) ─────────────────────────────────────────────────
+export {
+  getAssetInfo,
+  registerAsset,
+  unregisterAsset,
+  listKnownAssets,
+  canonicalAssetId,
+} from "./shared/assetRegistry";
+export type { AssetInfo, AssetMetadata } from "./shared/assetRegistry";
+
+// ─── Transaction simulation and safe execution preview (#612) ─────────────
+export { previewTransaction } from "./transaction/simulationPreview";
+export type {
+  TransactionPreview,
+  PreviewTransactionOptions,
+  PreviewAsset,
+  BalanceEffect,
+  StateChange,
+  PreviewSummaryLine,
+} from "./transaction/simulationPreview";
 
 // ─── Distributed tracing (#212) ────────────────────────────────────────────
 export {
@@ -1032,6 +1377,10 @@ export {
   exportPerformanceMetrics,
   resetPerformanceMetrics,
   DEFAULT_MAX_METRIC_ENTRIES,
+  Counter,
+  Timer,
+  createCounter,
+  startTimer,
 } from "./shared/metrics";
 export type {
   MetricEntry,
@@ -1078,7 +1427,10 @@ export type {
 } from "./transaction/bundles";
 
 // ─── Forecasting, storage analysis, and congestion monitoring ──────────────────
-export { forecastBalance, forecastAccountBalance } from "./account/balanceForecast";
+export {
+  forecastBalance,
+  forecastAccountBalance,
+} from "./account/balanceForecast";
 export type {
   BalanceForecastTransaction,
   BalanceForecastOptions,
@@ -1093,14 +1445,71 @@ export type {
   StorageRecommendation,
   StorageAnalysisReport,
 } from "./soroban/storageAnalysis";
-export { CongestionMonitor, createCongestionMonitor } from "./network/congestionMonitor";
+
+// ─── SAC Token Helpers (#580) ──────────────────────────────────────────────────
+export {
+  getSacBalance,
+  buildSacTransfer,
+  buildSacApprove,
+} from "./soroban/sacHelpers";
+
+// ─── Multi-Contract Sequence Executor (#581) ───────────────────────────────────
+export {
+  ContractSequencer,
+  executeSequence,
+} from "./soroban/contractSequencer";
+export type {
+  ContractSequenceStep,
+  StepExecutionResult,
+  SequenceExecutionResult,
+  SequenceExecutionConfig,
+  DependencyValidationResult,
+  DependencyErrorType,
+} from "./soroban/contractSequencer";
+
+// ─── Resource and Fee Estimation Explainer (#582) ───────────────────────────────
+export {
+  explainContractFees,
+  compareFeeExplanations,
+} from "./soroban/feeExplainer";
+export type {
+  FeeComponent,
+  ResourceMetrics,
+  FeeBreakdown,
+  FeeExplanation,
+} from "./soroban/feeExplainer";
+
+// ─── Contract Event Filter and Aggregation Engine (#583) ───────────────────────
+export {
+  EventAnalytics,
+  filterEvents,
+  groupEventsByTime,
+  countEventsByType,
+  aggregateEventMetrics,
+} from "./soroban/eventAnalytics";
+export type {
+  TimeInterval,
+  EventPredicate,
+  EventMetrics,
+  EventTypeDistribution,
+  TimeGroupedEvents,
+  TimeGroupedMetrics,
+} from "./soroban/eventAnalytics";
+
+export {
+  CongestionMonitor,
+  createCongestionMonitor,
+} from "./network/congestionMonitor";
 export type {
   CongestionSample,
   CongestionMonitorOptions,
   CongestionLevel,
   CongestionSnapshot,
 } from "./network/congestionMonitor";
-export { SpendingPolicyEngine, createSpendingPolicyEngine } from "./transaction/spendingPolicy";
+export {
+  SpendingPolicyEngine,
+  createSpendingPolicyEngine,
+} from "./transaction/spendingPolicy";
 export type {
   SpendingLimitPeriod,
   SpendingLimit,
@@ -1143,7 +1552,10 @@ export type {
   ContractSigningRequest,
   SigningRequestState,
 } from "./soroban/multiSigExecution";
-export { auditWalletSecurity, isHighRiskConnection } from "./wallet/securityAudit";
+export {
+  auditWalletSecurity,
+  isHighRiskConnection,
+} from "./wallet/securityAudit";
 export type {
   RiskSeverity,
   RiskConfidence,
@@ -1241,6 +1653,29 @@ export type {
   DecodingResult,
   TransactionDelta,
 } from "./transaction/xdrEncodingTypes";
+// ─── Transaction draft versioning (#518) ───────────────────────────────────────
+export {
+  DraftVersionManager,
+  createDraftVersionManager,
+  getDefaultDraftVersionManager,
+  createDraftVersion,
+  getDraftVersion,
+  getCurrentDraftVersion,
+  listDraftVersions,
+  compareDraftVersions,
+  revertDraft,
+  deleteDraft,
+  validateDraftVersion,
+} from "./transaction/draftVersioning";
+export type {
+  DraftVersion,
+  DraftMetadata,
+  DraftVersionDiff,
+  OperationDiff,
+  MetadataChange,
+  DraftVersionStore,
+  DraftVersioningConfig,
+} from "./transaction/draftVersioning";
 
 // ─── Multi-wallet portfolio aggregation (#525) ────────────────────────────────
 export {
@@ -1258,6 +1693,19 @@ export type {
   DuplicateSource,
   AggregatePortfolioOptions,
 } from "./account/portfolioAggregation";
+
+// ─── Account merge simulation & safety checks ─────────────────────────────────
+export {
+  simulateAccountMerge,
+  validateMerge,
+  getDataLoss,
+} from "./account/mergeSafety";
+export type {
+  MergeTrustlineInfo,
+  AccountMergeSimulation,
+  SimulateAccountMergeOptions,
+  AccountMergeDataLoss,
+} from "./account/mergeSafety";
 
 // ─── SDK health checks & diagnostics (#527) ───────────────────────────────────
 export {
@@ -1281,3 +1729,315 @@ export type {
   SdkHealthOptions,
   EndpointCheckOptions,
 } from "./shared/diagnostics";
+
+// ─── Centralised input validation ─────────────────────────────────────────────
+// Five validators covering the most common input types across the SDK.
+// All return SorokitResult<string> and never throw.
+export {
+  validateStellarAddress,
+  validatePublicKey,
+  validateAssetIssuer,
+  STELLAR_MAX_DECIMAL_PLACES,
+  STELLAR_MAX_ASSET_CODE_LENGTH,
+  STELLAR_MIN_ASSET_CODE_LENGTH,
+} from "./shared/validation";
+
+// ─── Account signer, history, effects, and data entries (#556/#557/#558/#559) ─
+export {
+  getSigners,
+  getThresholds,
+  analyzeSigningRequirement,
+} from "./account/signers";
+export type {
+  AccountSigner,
+  AccountSigners,
+  AccountThresholds,
+  SigningOperation,
+  SigningRequirement,
+} from "./account/signers";
+export { getPaymentHistory } from "./account/paymentHistory";
+export type {
+  PaymentInfo,
+  PaymentPage,
+  PaymentHistoryOptions,
+} from "./account/paymentHistory";
+export { getEffects } from "./account/getEffects";
+export type {
+  EffectInfo,
+  EffectsPage,
+  GetEffectsOptions,
+} from "./account/getEffects";
+export { getDataEntries } from "./account/dataEntries";
+export type { AccountDataEntries } from "./account/dataEntries";
+export {
+  buildSetDataEntryTransaction,
+  buildDeleteDataEntryTransaction,
+} from "./transaction/dataEntry";
+export { detectContractUpgrade } from "./soroban/upgradeDetection";
+export type {
+  UpgradeEvent,
+  ContractUpgradeDetectionOptions,
+} from "./soroban/upgradeDetection";
+
+// ─── Account health score and risk assessment (#590) ──────────────────────────
+export {
+  getAccountHealthScore,
+  assessAccountHealth,
+} from "./account/accountHealth";
+export type {
+  AccountHealthInput,
+  AccountHealthReport,
+  AccountHealthComponents,
+  AccountHealthRisk,
+  AccountHealthRiskSeverity,
+  AccountHealthLevel,
+  AssessAccountHealthOptions,
+} from "./account/accountHealth";
+export { assessHealthScore, calculateHealthScore } from "./account/healthScore";
+export type { HealthData, HealthRiskLevel } from "./account/healthScore";
+export {
+  addRecoverySigner,
+  getRecoveryPlan,
+  removeOldSigner,
+  rotateKeys,
+  DEFAULT_RECOVERY_WAIT_MS,
+} from "./account/recoveryHelper";
+export type { RecoveryPlan, RecoveryPlanStep } from "./account/recoveryHelper";
+
+// ─── OpenTelemetry (#600) ───────────────────────────────────────────────────
+export {
+  OpenTelemetryManager,
+  SorokitSpan,
+  InMemorySpanExporter,
+  ConsoleSpanExporter,
+  OtlpSpanExporter,
+  JaegerSpanExporter,
+  createOpenTelemetryManager,
+} from "./shared/openTelemetry";
+export type {
+  OtelSpan,
+  OtelSpanContext,
+  OtelSpanExporter,
+  OtelMetricRecord,
+  OtelMetricSummary,
+  OpenTelemetryConfig,
+  SpanKind,
+  SpanStatus,
+  SpanData,
+} from "./shared/openTelemetry";
+
+// ─── SEP-7 Handler (#602) ────────────────────────────────────────────────────
+export {
+  parseSep7Uri,
+  validateSep7Uri,
+  buildFromSep7Uri,
+  generateSep7Uri,
+} from "./integration/sep7Handler";
+export type {
+  Sep7OperationType,
+  Sep7BaseParams,
+  Sep7PayParams,
+  Sep7TxParams,
+  Sep7ChangeTrustParams,
+  Sep7ManageOfferParams,
+  Sep7PathPaymentParams,
+  Sep7Params,
+  Sep7ValidationResult,
+  Sep7BuildOptions,
+} from "./integration/sep7Handler";
+
+// ─── Smart Cache (#604) ──────────────────────────────────────────────────────
+export {
+  SmartCache,
+  createSmartCache,
+  generateCacheKey,
+  hashParams,
+} from "./shared/smartCache";
+export type {
+  CacheDataType,
+  CacheMetrics,
+  SmartCacheConfig,
+  CacheKeyOptions,
+  GetOrSetOptions,
+  StateChangeNotification,
+} from "./shared/smartCache";
+/**
+ * sorokit-core — public API
+ *
+ * Single entry point: createSorokitClient()
+ * All functionality is accessed through the returned client object.
+ */
+
+// ─── Entry point ──────────────────────────────────────────────────────────────
+export {
+  initTelemetry,
+  getTelemetryManager,
+  getTelemetryData,
+  isTelemetryInitialized,
+  shutdownTelemetry,
+  resetTelemetry,
+  traceSpan,
+  traceWalletConnect,
+  traceTransactionSubmit,
+  traceAccountFetch,
+  recordOperationDuration,
+  recordOperationError,
+  recordCacheHit,
+  getTelemetryMetricsSummary,
+  getTelemetrySpans,
+  validateTelemetryConfig,
+  resolveOpenTelemetryConfig,
+  DatadogHttpTelemetryExporter,
+} from "./performance/telemetry";
+export type {
+  TelemetryConfig,
+  TelemetryData,
+  TelemetryExporterType,
+  TelemetrySpan,
+} from "./performance/telemetry";
+
+// ─── Smart Cache (#604) ──────────────────────────────────────────────────────
+export {
+  generateKeypair,
+  generateMnemonic,
+  deriveFromMnemonic,
+  encryptKey,
+  decryptKey,
+  exportKey,
+} from "./security";
+export type {
+  GeneratedKeypair,
+  DerivedKey,
+  EncryptedKey,
+  KeyExportFormat,
+  ExportedKey,
+} from "./security";
+
+// ─── Transaction scheduler (#453) ────────────────────────────────────────────
+export { createCache, CacheBuilder } from "./performance/cacheStrategy";
+export type {
+  CachedData,
+  CacheStats,
+  CacheFetcher,
+} from "./performance/cacheStrategy";
+
+/**
+ * sorokit-core — public API
+ *
+ * Single entry point: createSorokitClient()
+ * All functionality is accessed through the returned client object.
+ */
+
+// ─── Entry point ──────────────────────────────────────────────────────────────
+export type { LazyModule, LazyModuleName } from "./lazy";
+
+// ─── On-chain governance (#686) ──────────────────────────────────────────────
+// `getVotingPower` is already exported above by the #456 governance helpers
+// (object-parameter signature), so the #686 variant is re-exported here as
+// `getGovernanceVotingPower`; it is also available unaliased as
+// `getVotingPower` from "sorokit-core/integration" and on client.integration.
+export {
+  configureGovernance,
+  createHttpGovernanceProvider,
+  getProposal,
+  getProposals,
+  getVotingPower as getGovernanceVotingPower,
+  trackProposal,
+  voteOnProposal,
+  PROPOSAL_STATUSES,
+  TERMINAL_PROPOSAL_STATUSES,
+} from "./integration/governance";
+export type {
+  GovernanceCallOptions,
+  GovernanceNetwork,
+  GovernanceProposal,
+  GovernanceProvider,
+  HttpGovernanceProviderOptions,
+  ProposalId,
+  ProposalStatus,
+  ProposalTally,
+  ProposalTracker,
+  TrackProposalOptions,
+  VoteChoice,
+  VoteReceipt,
+  VotingPower,
+} from "./integration/governance";
+export {
+  connectLedger,
+  LedgerSession,
+  ledgerAccountPath,
+  STELLAR_LEDGER_BIP32_PATH_PREFIX,
+} from "./wallet/adapters/ledgerAdapter";
+export type {
+  LedgerStellarApp,
+  LedgerTransportKind,
+  LedgerConnectOptions,
+  LedgerAccount,
+} from "./wallet/adapters/ledgerAdapter";
+export {
+  connectTrezor,
+  TrezorSession,
+  trezorAccountPath,
+  STELLAR_TREZOR_BIP32_PATH_PREFIX,
+} from "./wallet/adapters/trezorAdapter";
+export type {
+  TrezorStellarApi,
+  TrezorTransportKind,
+  TrezorConnectOptions,
+  TrezorAccount,
+} from "./wallet/adapters/trezorAdapter";
+export {
+  setContractSnapshotRetention,
+  pruneContractSnapshots,
+  getContractSnapshotCount,
+  setContractSchemaCacheCapacity,
+  getContractSchemaCacheSize,
+  pruneSchemaCache,
+  clearContractSchemaCache,
+  pruneMetadataCache,
+  getContractMetadataCacheStats,
+  getActiveContractEventSubscriptionCount,
+  unsubscribeAllContractEvents,
+  resetContractEventSubscriptionTracking,
+  sleepWithAbort,
+  checkMemoryUsage,
+  resetMemoryMonitorWarnings,
+  estimateValueBytes,
+} from "./soroban/contractMemory";
+export type {
+  ContractStateHistoryRetention,
+  ContractStateHistoryStats,
+} from "./soroban/contractStateHistory";
+export type {
+  MemoryUsageSample,
+  MemoryMonitorOptions,
+} from "./soroban/contractMemory";
+// ─── Real-time transaction status dashboard (#708) ───────────────────────────
+export {
+  TransactionStatusAggregator,
+  createTransactionStatusAggregator,
+  categorizeTransaction,
+  categoryFromOperationType,
+  filterDashboardTransactions,
+  streamTransactionStatus,
+  attachTransactionStreamToDashboard,
+  createWebSocketTransactionFeed,
+  REACT_DASHBOARD_EXAMPLE,
+  VUE_DASHBOARD_EXAMPLE,
+} from "./transaction/transactionDashboard";
+export type {
+  TransactionCategory,
+  DashboardTimeRange,
+  DashboardEntryHints,
+  DashboardTransactionEntry,
+  DashboardFilter,
+  DashboardMetrics,
+  DashboardChartData,
+  DashboardSnapshot,
+  DashboardListener,
+  TransactionStatusAggregatorOptions,
+  TransactionStatusStreamOptions,
+  TransactionStatusStreamHandle,
+  WebSocketTransactionFeedOptions,
+  WebSocketTransactionFeedHandle,
+} from "./transaction/transactionDashboard";

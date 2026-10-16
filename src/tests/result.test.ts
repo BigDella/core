@@ -1,5 +1,18 @@
 import { describe, it, expect } from "vitest";
-import { ok, err, isOk, isErr, isErrorCode, assertOk, SorokitErrorCode } from "../shared/response";
+import {
+  ok,
+  err,
+  isOk,
+  isErr,
+  isErrorCode,
+  assertOk,
+  SorokitErrorCode,
+  classifyError,
+  defaultRecoveryGuidance,
+  sanitizeErrorContext,
+  attachTraceId,
+  SorokitErrorCategory,
+} from "../shared/response";
 
 describe("shared/response", () => {
   describe("ok()", () => {
@@ -123,7 +136,11 @@ describe("result wrapper immutability (#286)", () => {
       expect(Object.isFrozen(result)).toBe(true);
       // Attempting to mutate a frozen object silently fails in non-strict mode
       // and throws a TypeError in strict mode. Either way, the value is unchanged.
-      try { (result as { status: string }).status = "error"; } catch { /* strict mode */ }
+      try {
+        (result as { status: string }).status = "error";
+      } catch {
+        /* strict mode */
+      }
       expect(result.status).toBe("ok");
     });
 
@@ -137,7 +154,11 @@ describe("result wrapper immutability (#286)", () => {
     it("the err() wrapper is frozen — result.status cannot be reassigned", () => {
       const result = err(SorokitErrorCode.UNKNOWN, "oops");
       expect(Object.isFrozen(result)).toBe(true);
-      try { (result as { status: string }).status = "ok"; } catch { /* strict mode */ }
+      try {
+        (result as { status: string }).status = "ok";
+      } catch {
+        /* strict mode */
+      }
       expect(result.status).toBe("error");
     });
 
@@ -172,7 +193,9 @@ describe("SorokitErrorCode exhaustive membership (#268)", () => {
       "WALLET_BROWSER_ONLY",
     ];
     for (const code of walletCodes) {
-      expect(SorokitErrorCode[code as keyof typeof SorokitErrorCode]).toBe(code);
+      expect(SorokitErrorCode[code as keyof typeof SorokitErrorCode]).toBe(
+        code,
+      );
     }
   });
 
@@ -184,18 +207,152 @@ describe("SorokitErrorCode exhaustive membership (#268)", () => {
       "CONTRACT_SIMULATE_FAILED",
     ];
     for (const code of contractCodes) {
-      expect(SorokitErrorCode[code as keyof typeof SorokitErrorCode]).toBe(code);
+      expect(SorokitErrorCode[code as keyof typeof SorokitErrorCode]).toBe(
+        code,
+      );
     }
   });
 
   it("enum contains all expected transaction error codes", () => {
-    const txCodes = ["TX_BUILD_FAILED", "TX_SIMULATE_FAILED", "TX_SUBMIT_FAILED", "TX_NOT_FOUND"];
+    const txCodes = [
+      "TX_BUILD_FAILED",
+      "TX_SIMULATE_FAILED",
+      "TX_SUBMIT_FAILED",
+      "TX_NOT_FOUND",
+    ];
     for (const code of txCodes) {
-      expect(SorokitErrorCode[code as keyof typeof SorokitErrorCode]).toBe(code);
+      expect(SorokitErrorCode[code as keyof typeof SorokitErrorCode]).toBe(
+        code,
+      );
     }
   });
 
   it("UNKNOWN is the generic fallback code", () => {
     expect(SorokitErrorCode.UNKNOWN).toBe("UNKNOWN");
+  });
+});
+
+describe("classifyError()", () => {
+  it("classifies INVALID_CONFIG as VALIDATION", () => {
+    const category = classifyError(SorokitErrorCode.INVALID_CONFIG);
+    expect(category).toBe(SorokitErrorCategory.VALIDATION);
+  });
+
+  it("classifies INVALID_ADDRESS as VALIDATION", () => {
+    const category = classifyError(SorokitErrorCode.INVALID_ADDRESS);
+    expect(category).toBe(SorokitErrorCategory.VALIDATION);
+  });
+
+  it("classifies OPERATION_TIMEOUT as TIMEOUT", () => {
+    const category = classifyError(SorokitErrorCode.OPERATION_TIMEOUT);
+    expect(category).toBe(SorokitErrorCategory.TIMEOUT);
+  });
+
+  it("classifies NETWORK_ERROR as NETWORK", () => {
+    const category = classifyError(SorokitErrorCode.NETWORK_ERROR);
+    expect(category).toBe(SorokitErrorCategory.NETWORK);
+  });
+
+  it("classifies WALLET_NOT_FOUND as WALLET", () => {
+    const category = classifyError(SorokitErrorCode.WALLET_NOT_FOUND);
+    expect(category).toBe(SorokitErrorCategory.WALLET);
+  });
+
+  it("classifies CONTRACT_INVOKE_FAILED as CONTRACT", () => {
+    const category = classifyError(SorokitErrorCode.CONTRACT_INVOKE_FAILED);
+    expect(category).toBe(SorokitErrorCategory.CONTRACT);
+  });
+
+  it("classifies TX_SUBMIT_FAILED as TRANSACTION", () => {
+    const category = classifyError(SorokitErrorCode.TX_SUBMIT_FAILED);
+    expect(category).toBe(SorokitErrorCategory.TRANSACTION);
+  });
+});
+
+describe("defaultRecoveryGuidance()", () => {
+  it("provides retryable guidance for NETWORK errors", () => {
+    const guidance = defaultRecoveryGuidance(SorokitErrorCategory.NETWORK);
+    expect(guidance.retryable).toBe(true);
+    expect(guidance.action).toContain("retry");
+  });
+
+  it("provides retryable guidance for TIMEOUT errors", () => {
+    const guidance = defaultRecoveryGuidance(SorokitErrorCategory.TIMEOUT);
+    expect(guidance.retryable).toBe(true);
+  });
+
+  it("provides non-retryable guidance for VALIDATION errors", () => {
+    const guidance = defaultRecoveryGuidance(SorokitErrorCategory.VALIDATION);
+    expect(guidance.retryable).toBe(false);
+    expect(guidance.action).toContain("Correct");
+  });
+
+  it("provides non-retryable guidance for WALLET errors", () => {
+    const guidance = defaultRecoveryGuidance(SorokitErrorCategory.WALLET);
+    expect(guidance.retryable).toBe(false);
+  });
+});
+
+describe("sanitizeErrorContext()", () => {
+  it("returns undefined when context is undefined", () => {
+    const result = sanitizeErrorContext(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  it("preserves operation field", () => {
+    const context = { operation: "transfer", parameters: {} };
+    const result = sanitizeErrorContext(context);
+    expect(result?.operation).toBe("transfer");
+  });
+
+  it("redacts sensitive keys in parameters", () => {
+    const context = {
+      parameters: {
+        amount: "100",
+        secret: "my-secret-key",
+        password: "pwd123",
+      },
+    };
+    const result = sanitizeErrorContext(context);
+    expect(result?.parameters?.amount).toBe("100");
+    expect(result?.parameters?.secret).toBe("[REDACTED]");
+    expect(result?.parameters?.password).toBe("[REDACTED]");
+  });
+
+  it("does not include undefined fields", () => {
+    const context = { operation: "test" };
+    const result = sanitizeErrorContext(context);
+    expect(result?.parameters).toBeUndefined();
+  });
+});
+
+describe("attachTraceId()", () => {
+  it("attaches traceId to error result when not present", () => {
+    const result = err(SorokitErrorCode.UNKNOWN, "test");
+    const withTrace = attachTraceId(result, "trace-123");
+    expect(withTrace.status).toBe("error");
+    if (withTrace.status === "error") {
+      expect(withTrace.error.traceId).toBe("trace-123");
+    }
+  });
+
+  it("does not overwrite existing traceId", () => {
+    const result = err(
+      SorokitErrorCode.UNKNOWN,
+      "test",
+      undefined,
+      "existing-trace",
+    );
+    const withTrace = attachTraceId(result, "new-trace");
+    expect(withTrace.status).toBe("error");
+    if (withTrace.status === "error") {
+      expect(withTrace.error.traceId).toBe("existing-trace");
+    }
+  });
+
+  it("returns ok result unchanged", () => {
+    const result = ok({ value: 42 });
+    const withTrace = attachTraceId(result, "trace-123");
+    expect(withTrace.status).toBe("ok");
   });
 });

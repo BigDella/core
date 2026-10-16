@@ -5,6 +5,7 @@ examples/*/dist/
 .env.local
 *.tsbuildinfo
 coverage/
+docs/api/
 .DS_Store
 .agents/
 scripts/

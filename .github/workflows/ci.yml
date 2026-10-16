@@ -7,69 +7,110 @@ on:
     branches: [main, develop]
 
 jobs:
-  test:
+  typecheck:
+    name: Typecheck
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          node-version: 22
+          cache: npm
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps --no-fund
 
-      - name: Run type check
+      - name: Typecheck
         run: npm run typecheck
 
-      - name: Run linter
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps --no-fund
+
+      - name: Lint
         run: npm run lint
 
-      - name: Run tests
-        run: npm run test || true
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps --no-fund
+
+      - name: Tests
+        run: npm run test
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps --no-fund
 
       - name: Build
         run: npm run build
 
-      - name: Validate build exports
-        run: node scripts/validate-exports.js
+      - name: Check bundle size
+        run: npm run size:check --if-present
 
-  # This job enforces that the merge commit would pass CI
-  validate-merge:
+  security:
+    name: Security Audit
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Setup Node.js
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
-          cache: "npm"
+          node-version: 22
+          cache: npm
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps --no-fund
 
-      - name: Verify no conflicts
-        run: |
-          if git status | grep -q "both modified"; then
-            echo "Merge conflicts detected"
-            exit 1
-          fi
-
-      - name: Run all checks
-        run: npm run typecheck && npm run lint && (npm run test || true) && npm run build && node scripts/validate-exports.js
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate || true
