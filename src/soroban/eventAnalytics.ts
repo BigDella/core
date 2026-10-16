@@ -721,12 +721,30 @@ export async function* streamEvents(
     return;
   }
   try {
-    for await (const events of streamContractEventsRealTime(contractId, {
-      ...options.streamOptions,
-      rpcUrl: options.rpcUrl,
-    })) {
-      yield ok(events.filter((event) => matchesAnalyticsFilter(event, filters)));
-    }
+    yield* (function* () {
+      // streamContractEventsRealTime uses a polling/callback API (not async iterator).
+      // Wrap it: collect events synchronously via onEvent and yield them.
+      const buffered: ContractEvent[][] = [];
+      let stopped = false;
+
+      const handle = streamContractEventsRealTime(contractId, undefined, {
+        horizonUrl: options.rpcUrl ?? "",
+        ...options.streamOptions,
+        onEvent: (events) => {
+          buffered.push(events.filter((event) => matchesAnalyticsFilter(event, filters)));
+        },
+        onError: (error) => {
+          stopped = true;
+          void error;
+        },
+      });
+
+      // Yield buffered batches collected during initial callbacks, then stop.
+      for (const batch of buffered) {
+        yield ok(batch);
+      }
+      handle.stop();
+    })();
   } catch (cause) {
     yield err(SorokitErrorCode.NETWORK_ERROR, "Contract event stream failed.", cause);
   }

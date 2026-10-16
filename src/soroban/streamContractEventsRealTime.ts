@@ -6,6 +6,9 @@
 import type { ContractEvent, ContractEventFilter } from "./subscribeContractEvents";
 import type { StreamContractEventsOptions } from "./types";
 
+/** Type alias for the options accepted by {@link streamContractEventsRealTime}. */
+export type StreamContractEventsRealTimeOptions = StreamContractEventsOptions;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }

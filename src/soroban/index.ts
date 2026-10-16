@@ -575,3 +575,10 @@ export type {
   ContractAuditFilter,
   ContractAuditStatus,
 } from "./contractAuditTrail";
+
+// ─── Contract upgrade detection ───────────────────────────────────────────────
+export { detectContractUpgrade } from "./upgradeDetection";
+export type {
+  UpgradeEvent,
+  ContractUpgradeDetectionOptions,
+} from "./upgradeDetection";

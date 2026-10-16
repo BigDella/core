@@ -394,12 +394,10 @@ export {
   generateRollbackInstructions,
 } from "./batchSubmitter";
 export type {
-  BatchConfig,
   BatchSubmissionResult,
   BatchTransactionStatus,
-  BatchTransactionStatusCode,
-  RetryStrategy,
-  RollbackInstruction,
+  BatchSubmissionOptions,
+  TransactionBatchStatus,
 } from "./batchSubmitter";
 export {
   buildTimeLockTransaction,
@@ -409,7 +407,6 @@ export {
 export type {
   TimeBounds,
   TimeLockExecutionStatus,
-  TimeLockTransactionOptions,
 } from "./timeLocks";
 
 // ─── Webhook support (#208, #395) ─────────────────────────────────────────────
@@ -736,13 +733,6 @@ export type {
   SigningRequest,
   SigningStatus,
 } from "./signingCoordinator";
-export type {
-  TransactionBatchStatus,
-  BatchTransactionStatus,
-  BatchSubmissionOptions,
-  BatchSubmissionResult,
-} from "./batchSubmitter";
-
 // ─── Transaction simulation and safe execution preview (#612) ─────────────────
 export { previewTransaction } from "./simulationPreview";
 export type {
