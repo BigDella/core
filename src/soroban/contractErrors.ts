@@ -52,16 +52,13 @@ export const ROUTER_ERROR_CODES = {
   MINIMUM_LIQUIDITY: 8,
 } as const;
 
-function entry(
-  message: string,
-  remediation?: string,
-): ContractErrorInfo {
+function entry(message: string, remediation?: string): ContractErrorInfo {
   return remediation === undefined ? { message } : { message, remediation };
 }
 
 /**
  * Standard mappings for the supported factory contracts.
- * Keyed by both symbolic name and stable numeric code.
+ * Keyed by both symbolic name and stable numeric code (namespaced as "FACTORY_<code>").
  */
 export const FACTORY_CONTRACT_ERRORS: ContractErrorMap = (() => {
   const byName: Record<string, ContractErrorInfo> = {
@@ -89,7 +86,9 @@ export const FACTORY_CONTRACT_ERRORS: ContractErrorMap = (() => {
   const map: ContractErrorMap = {};
   for (const [name, info] of Object.entries(byName)) {
     map[name] = info;
-    map[String(FACTORY_ERROR_CODES[name as keyof typeof FACTORY_ERROR_CODES])] = info;
+    map[
+      `FACTORY_${FACTORY_ERROR_CODES[name as keyof typeof FACTORY_ERROR_CODES]}`
+    ] = info;
   }
   return map;
 })();
@@ -136,7 +135,9 @@ export const ROUTER_CONTRACT_ERRORS: ContractErrorMap = (() => {
   const map: ContractErrorMap = {};
   for (const [name, info] of Object.entries(byName)) {
     map[name] = info;
-    map[String(ROUTER_ERROR_CODES[name as keyof typeof ROUTER_ERROR_CODES])] = info;
+    map[
+      `ROUTER_${ROUTER_ERROR_CODES[name as keyof typeof ROUTER_ERROR_CODES]}`
+    ] = info;
   }
   return map;
 })();
@@ -144,10 +145,13 @@ export const ROUTER_CONTRACT_ERRORS: ContractErrorMap = (() => {
 /**
  * Combined default mapping used when no custom map is supplied.
  *
- * Factory and router contracts emit overlapping numeric code spaces (each
- * starts at 1), so numeric keys in this merged map resolve to the ROUTER
- * entry. For precise factory decoding, pass `FACTORY_CONTRACT_ERRORS`
- * (or `ROUTER_CONTRACT_ERRORS`) explicitly as the error map.
+ * Factory and router contracts use namespaced numeric keys ("FACTORY_<code>",
+ * "ROUTER_<code>") to avoid collisions. Symbolic names remain keyed as-is.
+ * Numeric codes without a prefix (e.g. "1") will not match; callers expecting
+ * raw numeric codes must use the contract-specific map (FACTORY_CONTRACT_ERRORS
+ * or ROUTER_CONTRACT_ERRORS).
+ *
+ * (Disambiguation strategy: numeric key namespace prefixes. See #391.)
  */
 export const DEFAULT_CONTRACT_ERROR_MAP: ContractErrorMap = {
   ...FACTORY_CONTRACT_ERRORS,
@@ -167,10 +171,7 @@ function pushNumeric(codes: string[], value: unknown): void {
     codes.push(String(value));
     return;
   }
-  if (
-    typeof value === "bigint" ||
-    typeof value === "string"
-  ) {
+  if (typeof value === "bigint" || typeof value === "string") {
     const str = String(value).trim();
     if (/^-?\d+$/.test(str)) codes.push(str);
   }
@@ -218,7 +219,8 @@ function extractCandidateCodes(error: unknown): string[] {
     if (error !== null && typeof error === "object") {
       const obj = error as Record<string, unknown>;
       if (obj.code !== undefined) pushNumericOrSymbol(codes, obj.code);
-      if (obj.errorCode !== undefined) pushNumericOrSymbol(codes, obj.errorCode);
+      if (obj.errorCode !== undefined)
+        pushNumericOrSymbol(codes, obj.errorCode);
       if (
         typeof obj.status === "string" &&
         obj.status === "error" &&
@@ -227,9 +229,11 @@ function extractCandidateCodes(error: unknown): string[] {
       ) {
         const inner = obj.error as Record<string, unknown>;
         if (inner.code !== undefined) pushNumericOrSymbol(codes, inner.code);
-        if (typeof inner.message === "string") collectFromMessage(codes, inner.message);
+        if (typeof inner.message === "string")
+          collectFromMessage(codes, inner.message);
       }
-      if (typeof obj.message === "string") collectFromMessage(codes, obj.message);
+      if (typeof obj.message === "string")
+        collectFromMessage(codes, obj.message);
     }
   } catch {
     // Malformed input must never break decoding.
@@ -294,8 +298,8 @@ export function decodeContractError(
     originalMessage = error.message;
   } else if (error !== null && typeof error === "object") {
     const msg = (error as { message?: unknown }).message;
-    const innerMsg =
-      (error as { error?: { message?: unknown } }).error?.message;
+    const innerMsg = (error as { error?: { message?: unknown } }).error
+      ?.message;
     if (typeof msg === "string") originalMessage = msg;
     else if (typeof innerMsg === "string") originalMessage = innerMsg;
   }
@@ -307,7 +311,9 @@ export function decodeContractError(
         decoded: true,
         code,
         message: info.message,
-        ...(info.remediation !== undefined ? { remediation: info.remediation } : {}),
+        ...(info.remediation !== undefined
+          ? { remediation: info.remediation }
+          : {}),
         raw: error,
       };
     }
