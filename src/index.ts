@@ -173,6 +173,16 @@ export type {
   RetryStrategy,
   RollbackInstruction,
 } from "./transaction";
+export {
+  buildTimeLockTransaction,
+  validateTimeBounds,
+  getTimeLockedTransactionStatus,
+} from "./transaction";
+export type {
+  TimeBounds,
+  TimeLockExecutionStatus,
+  TimeLockTransactionOptions,
+} from "./transaction";
 
 // ─── Soroban types ────────────────────────────────────────────────────────────
 export { simulateContractSafe } from "./soroban/simulateContractSafe";

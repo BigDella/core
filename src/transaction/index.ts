@@ -158,6 +158,16 @@ export type {
   RetryStrategy,
   RollbackInstruction,
 } from "./batchSubmitter";
+export {
+  buildTimeLockTransaction,
+  validateTimeBounds,
+  getTimeLockedTransactionStatus,
+} from "./timeLocks";
+export type {
+  TimeBounds,
+  TimeLockExecutionStatus,
+  TimeLockTransactionOptions,
+} from "./timeLocks";
 // ─── Asset constants and factories ───────────────────────────────────────────
 export const USDC_MAINNET_ISSUER =
   "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
