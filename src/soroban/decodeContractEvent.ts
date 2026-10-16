@@ -22,9 +22,7 @@ function hasMethod(abi: ContractAbi, name: string): boolean {
     // xdr.ScSpecFunctionV0[] — each entry has a name() method
     return abi.some((fn) => {
       try {
-        /* eslint-disable @typescript-eslint/no-explicit-any */
         return (fn as any).name?.().toString() === name;
-        /* eslint-enable @typescript-eslint/no-explicit-any */
       } catch {
         return false;
       }
@@ -41,14 +39,10 @@ function hasMethod(abi: ContractAbi, name: string): boolean {
     // ContractAbiSpec — has funcs() method
     if (typeof (abi as Record<string, unknown>).funcs === "function") {
       try {
-        /* eslint-disable @typescript-eslint/no-explicit-any */
         const funcs = (abi as any).funcs() as unknown[];
-        /* eslint-enable @typescript-eslint/no-explicit-any */
         return funcs.some((fn) => {
           try {
-            /* eslint-disable @typescript-eslint/no-explicit-any */
             return (fn as any).name?.().toString() === name;
-            /* eslint-enable @typescript-eslint/no-explicit-any */
           } catch {
             return false;
           }
@@ -108,9 +102,7 @@ export function decodeContractEvent(
 
     if (isScValLike(rawValue)) {
       // Pass through to decodeContractValue — it expects an xdr.ScVal
-      /* eslint-disable @typescript-eslint/no-explicit-any */
       decodedValue = decodeContractValue(rawValue as any);
-      /* eslint-enable @typescript-eslint/no-explicit-any */
     } else {
       decodedValue = rawValue;
     }

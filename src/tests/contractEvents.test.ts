@@ -146,7 +146,6 @@ describe("streamContractEventsRealTime", () => {
         if (typeof delay === "number" && delay > 0) {
           delays.push(delay);
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return origSetTimeout(fn as any, delay, ...args);
       });
 
@@ -317,9 +316,7 @@ describe("EventIndex", () => {
 
     const results = index.query({ minLedger: 3, maxLedger: 7 });
     expect(results).toHaveLength(5);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     results.forEach((e) => expect((e as any).ledger).toBeGreaterThanOrEqual(3));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     results.forEach((e) => expect((e as any).ledger).toBeLessThanOrEqual(7));
   });
 

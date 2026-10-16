@@ -59,7 +59,7 @@ import {
 import { invokeContract } from "../soroban/invokeContract";
 import { getContractMethods } from "../soroban/contractMetadata";
 import { streamContractEventsRealTime } from "../soroban/streamContractEventsRealTime";
-import type { StreamContractEventsRealTimeOptions } from "../soroban/streamContractEventsRealTime";
+import type { StreamContractEventsOptions } from "../soroban/types";
 import { createContractStateTracker } from "../soroban/contractStateTracker";
 import {
   createLogger,
@@ -524,8 +524,8 @@ export interface SorokitClient {
      */
     streamContractEventsRealTime(
       contractId: string,
-      options?: Omit<StreamContractEventsRealTimeOptions, "rpcUrl">,
-    ): AsyncGenerator<ContractEvent[]>;
+      options?: Omit<StreamContractEventsOptions, "horizonUrl">,
+    ): { stop: () => void };
   };
 
   readonly network: {
@@ -1556,10 +1556,10 @@ export function createSorokitClient(
         ),
       streamContractEventsRealTime: (contractId, options) => {
         logger.debug("soroban.streamContractEventsRealTime", { contractId });
-        return streamContractEventsRealTime(contractId, {
-          rpcUrl,
+        return streamContractEventsRealTime(contractId, undefined, {
           ...options,
-        });
+          horizonUrl: networkConfig.horizonUrl,
+        } as StreamContractEventsOptions);
       },
     },
 

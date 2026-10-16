@@ -118,7 +118,6 @@ describe("Integration: contractEventStream", () => {
         if (typeof delay === "number" && delay >= 1000) {
           capturedDelays.push(delay);
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return origSetTimeout(fn as any, delay, ...args);
       });
 

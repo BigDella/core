@@ -355,3 +355,48 @@ export type {
   ExportTransactionHistoryOptions,
 } from "./exportTransactionHistory";
 
+// ─── Manage offer (#op) ───────────────────────────────────────────────────────
+export interface ManageOfferParams extends MemoParams {
+  sellingAssetCode?: string;
+  sellingAssetIssuer?: string;
+  buyingAssetCode?: string;
+  buyingAssetIssuer?: string;
+  amount: string;
+  price: string;
+  offerId?: string;
+  fee?: string;
+  autoFetchSequence?: boolean;
+}
+
+// ─── Clawback (#op) ───────────────────────────────────────────────────────────
+export interface ClawbackParams extends MemoParams {
+  assetCode: string;
+  assetIssuer: string;
+  from: string;
+  amount: string;
+  fee?: string;
+  autoFetchSequence?: boolean;
+}
+
+// ─── Liquidity pool deposit (#op) ─────────────────────────────────────────────
+export interface LiquidityPoolDepositParams extends MemoParams {
+  liquidityPoolId: string;
+  maxAmountA: string;
+  maxAmountB: string;
+  minPrice: string;
+  maxPrice: string;
+  fee?: string;
+  autoFetchSequence?: boolean;
+}
+
+// ─── Liquidity pool withdraw (#op) ────────────────────────────────────────────
+export interface LiquidityPoolWithdrawParams extends MemoParams {
+  liquidityPoolId: string;
+  amount: string;
+  minAmountA: string;
+  minAmountB: string;
+  fee?: string;
+  autoFetchSequence?: boolean;
+}
+
+

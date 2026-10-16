@@ -23,9 +23,7 @@ function hashKey(event: ContractEvent): string {
       ":" +
       String(event.contractId ?? "") +
       ":" +
-      /* eslint-disable @typescript-eslint/no-explicit-any */
       String((event as any).ledger ?? "") +
-      /* eslint-enable @typescript-eslint/no-explicit-any */
       ":" +
       String(event.name ?? ""),
   );
@@ -37,9 +35,7 @@ function fullKey(event: ContractEvent): string {
     "|" +
     String(event.contractId ?? "") +
     "|" +
-    /* eslint-disable @typescript-eslint/no-explicit-any */
     String((event as any).ledger ?? "")
-    /* eslint-enable @typescript-eslint/no-explicit-any */
   );
 }
 
@@ -125,9 +121,7 @@ export class EventIndex {
     if (filter.minLedger !== undefined) {
       const min = filter.minLedger;
       events = events.filter((e) => {
-        /* eslint-disable @typescript-eslint/no-explicit-any */
         const ledger = (e as any).ledger;
-        /* eslint-enable @typescript-eslint/no-explicit-any */
         return typeof ledger === "number" && ledger >= min;
       });
     }
@@ -135,9 +129,7 @@ export class EventIndex {
     if (filter.maxLedger !== undefined) {
       const max = filter.maxLedger;
       events = events.filter((e) => {
-        /* eslint-disable @typescript-eslint/no-explicit-any */
         const ledger = (e as any).ledger;
-        /* eslint-enable @typescript-eslint/no-explicit-any */
         return typeof ledger === "number" && ledger <= max;
       });
     }

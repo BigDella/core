@@ -52,14 +52,8 @@ export {
   DEFAULT_RECOVERY_WINDOW_MS,
 } from "./subscribeContractEvents";
 export { streamContractEventsRealTime } from "./streamContractEventsRealTime";
-export type {
-  StreamContractEventsRealTimeOptions,
-} from "./streamContractEventsRealTime";
 export {
   EventIndex,
-  filterNewEvents,
-  hashEvent,
-  hashString,
 } from "./eventIndex";
 export {
   getContractMethods,
@@ -159,14 +153,6 @@ export type {
 } from "./factoryStatistics";
 export {
   decodeContractEvent,
-  decodeFactoryEvent,
-  decodeRouterEvent,
-} from "./decodeContractEvent";
-export type {
-  ContractEventDecoder,
-  DecodedContractEvent,
-  PairCreatedEvent,
-  SwapEvent,
 } from "./decodeContractEvent";
 export {
   snapshotContractState,
@@ -176,49 +162,6 @@ export {
 } from "./contractSnapshot";
 export { calculateStorageRent, renewContractStorage } from "./storageExpiration";
 export type { ContractSnapshot, SnapshotDiff } from "./contractSnapshot";
-export { getNftMetadata, clearNftMetadataCache } from "./nftMetadata";
-export type { NftMetadata, NftMetadataOptions } from "./nftMetadata";
-export type { BuildContractDeployOptions } from "./deployContract";
-// Event archival exports
-export {
-  EventArchivalManager,
-  InMemoryEventArchiveStorage,
-  queryContractEventArchive,
-  calculateArchivedEventRate,
-  getArchivedEventTimeSeries,
-} from "./eventArchival";
-export type {
-  EventArchiveStorage,
-  ArchivedContractEvent,
-  EventArchiveQuery,
-  ArchiveQueryResult,
-  PaginationInfo,
-  TimeSeriesBucket,
-  EventTypeCount,
-  EventAggregation,
-  EventArchivalOptions,
-  EventArchivalSubscription,
-  ArchivalStats,
-  StorageStats,
-} from "./eventArchival";
-
-export type {
-  ContractEvent,
-  EventFilterPredicate,
-  ContractEventFilter,
-  ContractEventSubscriptionOptions,
-} from "./subscribeContractEvents";
-export {
-  InMemoryEventIndex,
-  indexContractEvent,
-  queryIndexedEvents,
-} from "./eventIndex";
-export type {
-  IndexedContractEvent,
-  IndexedEventFilter,
-  IndexedEventPage,
-  IndexedEventQueryResult,
-} from "./eventIndex";
 export { analyzeCallOptimization } from "./callOptimization";
 export type {
   CallOptimizationReport,
