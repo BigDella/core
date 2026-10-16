@@ -11,9 +11,12 @@ import type { SorokitResult } from "../shared/response";
 import { SorokitErrorCategory, SorokitErrorCode } from "../shared/response";
 
 /**
- * Transaction priority level.
+ * Priority level for queue scheduling.
+ *
+ * Kept separate from the fee-estimation `TransactionPriority` (which uses
+ * "urgent" rather than "critical").
  */
-export type TransactionPriority = "low" | "normal" | "high" | "critical";
+export type QueuePriority = "low" | "normal" | "high" | "critical";
 
 /**
  * Queue item status.
@@ -29,7 +32,7 @@ export interface QueuedTransaction {
   /** Transaction envelope XDR */
   envelopeXdr: string;
   /** Priority level */
-  priority: TransactionPriority;
+  priority: QueuePriority;
   /** Current status */
   status: QueueItemStatus;
   /** Dependencies on other transaction IDs */
@@ -149,7 +152,7 @@ export class TransactionQueue {
   enqueue(
     id: string,
     envelopeXdr: string,
-    priority: TransactionPriority = "normal",
+    priority: QueuePriority = "normal",
     dependsOn?: string[],
   ): SorokitResult<QueuedTransaction> {
     try {
