@@ -61,16 +61,28 @@ export interface CheckNetworkHealthOptions {
   slowLatencyMs?: number;
 }
 
+interface EndpointProbe {
+  method?: "GET" | "POST";
+  headers?: Record<string, string>;
+  body?: string;
+}
+
 async function pingEndpoint(
   url: string,
   fetchFn: typeof fetch,
   timeoutMs: number,
+  probe: EndpointProbe = {},
 ): Promise<NetworkEndpointHealth> {
   const start = Date.now();
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetchFn(url, { method: "GET", signal: controller.signal });
+    const res = await fetchFn(url, {
+      method: probe.method ?? "GET",
+      ...(probe.headers ? { headers: probe.headers } : {}),
+      ...(probe.body !== undefined ? { body: probe.body } : {}),
+      signal: controller.signal,
+    });
     const latencyMs = Date.now() - start;
     return {
       reachable: res.ok,
@@ -116,9 +128,17 @@ export async function checkNetworkHealth(
   }
 
   const horizonPingUrl = `${horizonUrl.replace(/\/$/, "")}/ledgers?limit=1`;
+  // The Soroban RPC root does not answer bare GET requests (providers return
+  // 404/405), so probe the standard JSON-RPC `getHealth` method instead.
+  const rpcPingUrl = rpcUrl.replace(/\/$/, "");
+  const rpcHealthProbe: EndpointProbe = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getHealth", params: [] }),
+  };
   const [horizon, rpc] = await Promise.all([
     pingEndpoint(horizonPingUrl, fetchFn, timeoutMs),
-    pingEndpoint(rpcUrl, fetchFn, timeoutMs),
+    pingEndpoint(rpcPingUrl, fetchFn, timeoutMs, rpcHealthProbe),
   ]);
 
   const issues: string[] = [];

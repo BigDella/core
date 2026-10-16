@@ -15,7 +15,14 @@ import { StrKey } from "@stellar/stellar-sdk";
 export interface SigningRequest {
   xdr: string;
   requiredSigners: string[];
-  collectedSignatures: Map<string, string>;
+  /**
+   * Signatures collected so far, keyed by signer public key.
+   *
+   * A plain record (not a `Map`) so that signing requests survive
+   * `JSON.stringify`/`JSON.parse` round-trips without silently dropping
+   * signatures when persisted, transmitted, or logged.
+   */
+  collectedSignatures: Record<string, string>;
   threshold: number;
 }
 
@@ -80,11 +87,71 @@ export function createSigningRequest(
   const request: SigningRequest = {
     xdr,
     requiredSigners,
-    collectedSignatures: new Map(),
+    collectedSignatures: {},
     threshold: finalThreshold,
   };
 
   return ok(request);
+}
+
+/**
+ * Serialize a signing request to a JSON string. Because `collectedSignatures`
+ * is a plain record, signatures round-trip losslessly.
+ */
+export function serializeSigningRequest(request: SigningRequest): string {
+  return JSON.stringify(request);
+}
+
+/**
+ * Rehydrate a signing request produced by `serializeSigningRequest` (or a
+ * plain `JSON.stringify` of a request).
+ */
+export function deserializeSigningRequest(
+  serialized: string,
+): SorokitResult<SigningRequest> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(serialized);
+  } catch {
+    return err(
+      SorokitErrorCode.VALIDATION,
+      "Signing request must be valid JSON",
+    );
+  }
+
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return err(
+      SorokitErrorCode.VALIDATION,
+      "Signing request must be a JSON object",
+    );
+  }
+
+  const candidate = parsed as Partial<SigningRequest>;
+  if (
+    typeof candidate.xdr !== "string" ||
+    !Array.isArray(candidate.requiredSigners) ||
+    typeof candidate.threshold !== "number"
+  ) {
+    return err(
+      SorokitErrorCode.VALIDATION,
+      "Signing request is missing required fields",
+    );
+  }
+
+  const rawSignatures = candidate.collectedSignatures;
+  const collectedSignatures: Record<string, string> = {};
+  if (rawSignatures && typeof rawSignatures === "object" && !Array.isArray(rawSignatures)) {
+    for (const [signer, signature] of Object.entries(rawSignatures)) {
+      if (typeof signature === "string") collectedSignatures[signer] = signature;
+    }
+  }
+
+  return ok({
+    xdr: candidate.xdr,
+    requiredSigners: candidate.requiredSigners as string[],
+    collectedSignatures,
+    threshold: candidate.threshold,
+  });
 }
 
 /**
@@ -131,14 +198,14 @@ export function addSignature(
     );
   }
 
-  if (request.collectedSignatures.has(signer)) {
+  if (Object.prototype.hasOwnProperty.call(request.collectedSignatures, signer)) {
     return err(
       SorokitErrorCode.VALIDATION,
       `Signature from ${signer} already collected (duplicate submission)`,
     );
   }
 
-  request.collectedSignatures.set(signer, signature);
+  request.collectedSignatures[signer] = signature;
   return ok(undefined);
 }
 
@@ -160,7 +227,7 @@ export function isComplete(request: SigningRequest): SorokitResult<boolean> {
     );
   }
 
-  const signatureCount = request.collectedSignatures.size;
+  const signatureCount = Object.keys(request.collectedSignatures).length;
   const complete = signatureCount >= request.threshold;
 
   return ok(complete);
@@ -186,7 +253,7 @@ export function getSigningStatus(
     );
   }
 
-  const signed = Array.from(request.collectedSignatures.keys());
+  const signed = Object.keys(request.collectedSignatures);
   const pending = request.requiredSigners.filter(
     (signer) => !signed.includes(signer),
   );
