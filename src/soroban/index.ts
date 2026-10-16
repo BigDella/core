@@ -24,6 +24,7 @@ export {
   listSnapshots,
   clearSnapshots,
 } from "./contractSnapshot";
+export { calculateStorageRent, renewContractStorage } from "./storageExpiration";
 export type { ContractSnapshot, SnapshotDiff } from "./contractSnapshot";
 export type { BuildContractDeployOptions } from "./deployContract";
 export type {
@@ -49,4 +50,7 @@ export type {
   DecodedContractEvent,
   StreamContractEventsOptions,
   EventIndexFilter,
+  StorageEntry,
+  StorageRentResult,
+  RenewContractStorageResult,
 } from "./types";

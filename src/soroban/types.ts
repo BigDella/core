@@ -173,3 +173,36 @@ export interface EventIndexFilter {
   maxLedger?: number;
   predicate?: (event: ContractEvent) => boolean;
 }
+
+/** A single contract storage entry returned by calculateStorageRent */
+export interface StorageEntry {
+  contractId: string;
+  /** xdr.LedgerKey serialised to base64 for the caller's reference */
+  keyXdr: string;
+  /** Ledger sequence after which the entry expires (from liveUntilLedgerSeq) */
+  liveUntilLedgerSeq: number;
+  /** Ledger sequences remaining until expiry (liveUntilLedgerSeq - latestLedger) */
+  remainingLedgers: number;
+  /**
+   * Rough cost estimate in stroops derived from remaining TTL.
+   * Formula: ceil(remainingLedgers / 1000) * 10000 stroops.
+   * Returns 0 when the entry is already expired or not found.
+   * @remarks This is an estimate only — actual renewal cost depends on simulation.
+   */
+  estimatedRenewalCostStroops: number;
+}
+
+/** Aggregated result from calculateStorageRent */
+export interface StorageRentResult {
+  /** Ledger sequence returned by the RPC node at the time of the call */
+  ledgerSequence: number;
+  entries: StorageEntry[];
+}
+
+/** Result from renewContractStorage */
+export interface RenewContractStorageResult {
+  /** Base64-encoded TransactionEnvelope XDR containing ExtendFootprintTTL */
+  operationXdr: string;
+  /** Current account sequence number used as the transaction source */
+  suggestedSequence: string;
+}
