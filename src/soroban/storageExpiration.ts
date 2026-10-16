@@ -113,13 +113,21 @@ export async function calculateStorageRent(
 /**
  * Build a valid ExtendFootprintTTL transaction XDR for the given contract.
  *
+ * @param contractId - The contract whose persistent instance entry TTL should be extended.
+ * @param extendByLedgers - The minimum TTL delta in ledgers from the last closed ledger (LCL).
+ *   This is a **relative** value — the number of ledgers past the current ledger for which the
+ *   entry must remain live. It is passed directly to the SDK's `extendTo` field in
+ *   `Operation.extendFootprintTtl`. Pass the desired TTL duration, e.g. 100_000 for ~5 days
+ *   on Testnet. Do NOT pass an absolute ledger sequence number here.
+ * @param options - RPC, Horizon, network and account options.
+ *
  * Returns a Base64-encoded TransactionEnvelope that can be decoded by
  * TransactionBuilder.fromXDR(xdr, networkPassphrase) without error.
  * The caller must sign and submit the transaction separately.
  */
 export async function renewContractStorage(
   contractId: string,
-  extendToLedger: number,
+  extendByLedgers: number,
   options: RenewContractStorageOptions,
 ): Promise<SorokitResult<RenewContractStorageResult>> {
   let sourceAccount: { sequence: string; accountId: () => string };
@@ -150,7 +158,7 @@ export async function renewContractStorage(
       fee: BASE_FEE,
       networkPassphrase: options.networkPassphrase,
     })
-      .addOperation(Operation.extendFootprintTtl({ extendTo: extendToLedger }))
+      .addOperation(Operation.extendFootprintTtl({ extendTo: extendByLedgers }))
       .setTimeout(DEFAULT_TX_TIMEOUT_SECONDS)
       .build();
 

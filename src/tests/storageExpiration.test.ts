@@ -280,6 +280,7 @@ describe("renewContractStorage", () => {
     mockLoadAccount.mockResolvedValueOnce(makeSourceAccount("100"));
 
     const contractId = makeContractId();
+    // extendByLedgers is a relative TTL delta (ledgers from LCL), not an absolute ledger sequence
     const result = await renewContractStorage(contractId, 55000, {
       rpcUrl: RPC_URL,
       networkPassphrase: NETWORK_PASSPHRASE,
@@ -300,6 +301,7 @@ describe("renewContractStorage", () => {
     mockLoadAccount.mockResolvedValueOnce(makeSourceAccount("42"));
 
     const contractId = makeContractId();
+    // extendByLedgers: 60000 ledgers of TTL from LCL (~3 days on Testnet)
     const result = await renewContractStorage(contractId, 60000, {
       rpcUrl: RPC_URL,
       networkPassphrase: NETWORK_PASSPHRASE,
@@ -377,5 +379,71 @@ describe("renewContractStorage", () => {
     if (result.status === "error") {
       expect(result.error.code).toBe(SorokitErrorCode.ACCOUNT_FETCH_FAILED);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// estimatedRenewalCostStroops boundary tests (finding #3)
+// ---------------------------------------------------------------------------
+
+describe("calculateStorageRent — estimatedRenewalCostStroops boundary cases", () => {
+  beforeEach(() => {
+    mockGetLedgerEntries.mockReset();
+  });
+
+  async function getRentEntry(liveUntilLedgerSeq: number, latestLedger: number) {
+    const { xdr, Address } = await vi.importActual<typeof import("@stellar/stellar-sdk")>(
+      "@stellar/stellar-sdk",
+    );
+    const contractId = makeContractId();
+    const address = Address.fromString(contractId);
+    const key = xdr.LedgerKey.contractData(
+      new xdr.LedgerKeyContractData({
+        contract: address.toScAddress(),
+        key: xdr.ScVal.scvLedgerKeyContractInstance(),
+        durability: xdr.ContractDataDurability.persistent(),
+      }),
+    );
+
+    mockGetLedgerEntries.mockResolvedValueOnce({
+      latestLedger,
+      entries: [{ key, val: {}, lastModifiedLedgerSeq: latestLedger - 1, liveUntilLedgerSeq }],
+    });
+
+    const result = await calculateStorageRent([contractId], {
+      rpcUrl: RPC_URL,
+      networkPassphrase: NETWORK_PASSPHRASE,
+    });
+
+    if (result.status !== "ok") throw new Error("Expected ok result");
+    return result.data.entries[0];
+  }
+
+  it("returns 0 cost when entry is already expired (0 remaining ledgers)", async () => {
+    // liveUntilLedgerSeq <= latestLedger → already expired
+    const entry = await getRentEntry(50000, 50000);
+    expect(entry.remainingLedgers).toBe(0);
+    expect(entry.estimatedRenewalCostStroops).toBe(0);
+  });
+
+  it("returns 10000 stroops for 1 remaining ledger", async () => {
+    // remainingLedgers = 1 → ceil(1/1000) * 10000 = 1 * 10000 = 10000
+    const entry = await getRentEntry(50001, 50000);
+    expect(entry.remainingLedgers).toBe(1);
+    expect(entry.estimatedRenewalCostStroops).toBe(10000);
+  });
+
+  it("returns 10000 stroops for exactly 1000 remaining ledgers (boundary)", async () => {
+    // remainingLedgers = 1000 → ceil(1000/1000) * 10000 = 1 * 10000 = 10000
+    const entry = await getRentEntry(51000, 50000);
+    expect(entry.remainingLedgers).toBe(1000);
+    expect(entry.estimatedRenewalCostStroops).toBe(10000);
+  });
+
+  it("returns 20000 stroops for 1001 remaining ledgers (crosses boundary)", async () => {
+    // remainingLedgers = 1001 → ceil(1001/1000) * 10000 = 2 * 10000 = 20000
+    const entry = await getRentEntry(51001, 50000);
+    expect(entry.remainingLedgers).toBe(1001);
+    expect(entry.estimatedRenewalCostStroops).toBe(20000);
   });
 });
