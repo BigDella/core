@@ -1,15 +1,6 @@
 import { StrKey, xdr } from "@stellar/stellar-sdk";
 import type { ContractResultType } from "./types";
 
-export {
-  classifySorobanRpcError,
-  extractRpcErrorMessage,
-  mapSorobanRpcError,
-  mapSorobanRpcResult,
-  mapRpcError,
-} from "./rpcErrorMapper";
-export type { SorobanRpcErrorPayload } from "./rpcErrorMapper";
-
 export type ContractDataType = ContractResultType;
 
 export interface ContractDataValidationIssue {
@@ -58,28 +49,11 @@ export {
   subscribeContractEvents,
   queryContractEvents,
   streamContractEvents,
-  sleepWithAbort,
-  getActiveContractEventSubscriptionCount,
-  unsubscribeAllContractEvents,
-  resetContractEventSubscriptionTracking,
   DEFAULT_RECOVERY_WINDOW_MS,
 } from "./subscribeContractEvents";
 export { streamContractEventsRealTime } from "./streamContractEventsRealTime";
-export type {
-  StreamContractEventsRealTimeOptions,
-} from "./streamContractEventsRealTime";
-export { decodeContractResult, createDecoder } from "./resultDecoder";
-export type {
-  ContractResultPrimitive,
-  ContractResultSchema,
-  ContractResultInput,
-  DecodedContractResult,
-} from "./resultDecoder";
 export {
   EventIndex,
-  filterNewEvents,
-  hashEvent,
-  hashString,
 } from "./eventIndex";
 export {
   getContractMethods,
@@ -87,12 +61,6 @@ export {
   validateContractArgs,
   preloadContractMetadata,
   setMetadataCacheCapacity,
-  setContractSchemaCacheCapacity,
-  getContractSchemaCacheSize,
-  pruneSchemaCache,
-  clearContractSchemaCache,
-  pruneMetadataCache,
-  getContractMetadataCacheStats,
 } from "./contractMetadata";
 export type {
   ContractSchema,
@@ -185,57 +153,15 @@ export type {
 } from "./factoryStatistics";
 export {
   decodeContractEvent,
-  decodeFactoryEvent,
-  decodeRouterEvent,
-} from "./decodeContractEvent";
-export type {
-  ContractEventDecoder,
-  DecodedContractEvent,
-  PairCreatedEvent,
-  SwapEvent,
 } from "./decodeContractEvent";
 export {
   snapshotContractState,
   compareSnapshots,
   listSnapshots,
   clearSnapshots,
-  setContractSnapshotRetention,
-  pruneContractSnapshots,
-  getContractSnapshotCount,
 } from "./contractSnapshot";
+export { calculateStorageRent, renewContractStorage } from "./storageExpiration";
 export type { ContractSnapshot, SnapshotDiff } from "./contractSnapshot";
-export { getNftMetadata, clearNftMetadataCache } from "./nftMetadata";
-export type { NftMetadata, NftMetadataOptions } from "./nftMetadata";
-export type { BuildContractDeployOptions } from "./deployContract";
-// Event archival exports
-export {
-  EventArchivalManager,
-  InMemoryEventArchiveStorage,
-  queryContractEventArchive,
-  calculateArchivedEventRate,
-  getArchivedEventTimeSeries,
-} from "./eventArchival";
-export type {
-  EventArchiveStorage,
-  ArchivedContractEvent,
-  EventArchiveQuery,
-  ArchiveQueryResult,
-  PaginationInfo,
-  TimeSeriesBucket,
-  EventTypeCount,
-  EventAggregation,
-  EventArchivalOptions,
-  EventArchivalSubscription,
-  ArchivalStats,
-  StorageStats,
-} from "./eventArchival";
-
-export type {
-  ContractEvent,
-  EventFilterPredicate,
-  ContractEventFilter,
-  ContractEventSubscriptionOptions,
-} from "./subscribeContractEvents";
 export { analyzeCallOptimization } from "./callOptimization";
 export type {
   CallOptimizationReport,
@@ -270,6 +196,12 @@ export type {
   SimulateTransactionResult,
   BatchContractInvocation,
   BatchContractResult,
+  DecodedContractEvent,
+  StreamContractEventsOptions,
+  EventIndexFilter,
+  StorageEntry,
+  StorageRentResult,
+  RenewContractStorageResult,
   ContractAbiField,
   ContractAbiTypeDescriptor,
   SorobanSimulationFeeBreakdown,
@@ -590,20 +522,7 @@ export type {
   ContractStateComparison,
   SnapshotIntegrityReport,
   SnapshotQuery,
-  ContractStateHistoryRetention,
-  ContractStateHistoryStats,
 } from "./contractStateHistory";
-export {
-  getContractState,
-  getContractStateAt,
-  getStateChanges,
-  watchContractState,
-} from "./stateHistory";
-export type {
-  ContractStateRead,
-  ContractStateSource,
-  WatchContractStateOptions,
-} from "./stateHistory";
 
 // ─── Contract state optimization (#514) ───────────────────────────────────────
 export {
@@ -657,62 +576,9 @@ export type {
   ContractAuditStatus,
 } from "./contractAuditTrail";
 
-// ─── SAC Token Helpers (#580) ──────────────────────────────────────────────────
-export {
-  getSacBalance,
-  buildSacTransfer,
-  buildSacApprove,
-} from "./sacHelpers";
-
-// ─── Multi-Contract Sequence Executor (#581) ───────────────────────────────────
-export {
-  ContractSequencer,
-  executeSequence,
-} from "./contractSequencer";
-export type {
-  ContractSequenceStep,
-  StepExecutionResult,
-  SequenceExecutionResult,
-  SequenceExecutionConfig,
-  DependencyValidationResult,
-  DependencyErrorType,
-} from "./contractSequencer";
-
-// ─── Resource and Fee Estimation Explainer (#582) ───────────────────────────────
-export {
-  explainContractFees,
-  compareFeeExplanations,
-} from "./feeExplainer";
-export type {
-  FeeComponent,
-  ResourceMetrics,
-  FeeBreakdown,
-  FeeExplanation,
-} from "./feeExplainer";
-
-// ─── Contract Event Filter and Aggregation Engine (#583) ───────────────────────
-export {
-  EventAnalytics,
-  filterEvents,
-  aggregateEvents,
-  streamEvents,
-  groupEventsByTime,
-  countEventsByType,
-  aggregateEventMetrics,
-} from "./eventAnalytics";
-export type {
-  TimeInterval,
-  EventPredicate,
-  EventMetrics,
-  EventTypeDistribution,
-  TimeGroupedEvents,
-  TimeGroupedMetrics,
-  ContractEventAnalyticsFilter,
-  ContractEventLoader,
-  EventAnalyticsOptions,
-  EventAggregate,
-  EventGroupBy,
-} from "./eventAnalytics";
-
+// ─── Contract upgrade detection ───────────────────────────────────────────────
 export { detectContractUpgrade } from "./upgradeDetection";
-export type { UpgradeEvent, ContractUpgradeDetectionOptions } from "./upgradeDetection";
+export type {
+  UpgradeEvent,
+  ContractUpgradeDetectionOptions,
+} from "./upgradeDetection";

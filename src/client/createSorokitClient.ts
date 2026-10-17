@@ -145,6 +145,7 @@ import type {
 } from "../soroban/contractStateHistory";
 import { createContractStateHistory } from "../soroban/contractStateHistory";
 import type { StreamContractEventsRealTimeOptions } from "../soroban/streamContractEventsRealTime";
+import { streamContractEventsRealTime } from "../soroban/streamContractEventsRealTime";
 import { submitTransaction } from "../transaction/submitTransaction";
 import { getTransactionStatus } from "../transaction/status";
 import { previewTransaction } from "../transaction/simulationPreview";
@@ -2475,7 +2476,7 @@ export function createSorokitClient(
                   ...(onUpgrade ? { onUpgrade } : {}),
                 },
               ),
-          ).then(applyTx),
+          ).then(applyTx) as any,
         ),
       simulate: (transactionXdr, timeoutMs) =>
         guard("soroban_simulate", timeoutMs, (signal) =>
@@ -2597,13 +2598,36 @@ export function createSorokitClient(
         ),
       streamContractEventsRealTime: async function* (contractId, options) {
         logger.debug("soroban.streamContractEventsRealTime", { contractId });
-        yield* (await import("../soroban")).streamContractEventsRealTime(
-          contractId,
-          {
-            rpcUrl,
-            ...options,
+        const queue: ContractEvent[][] = [];
+        let resolve: (() => void) | null = null;
+        let done = false;
+
+        const handle = streamContractEventsRealTime(contractId, undefined, {
+          horizonUrl: rpcUrl,
+          ...options,
+          onEvent: (events) => {
+            queue.push(events);
+            resolve?.();
+            resolve = null;
           },
-        );
+          onError: () => {
+            done = true;
+            resolve?.();
+            resolve = null;
+          },
+        });
+
+        try {
+          while (!done) {
+            if (queue.length > 0) {
+              yield queue.shift()!;
+            } else {
+              await new Promise<void>((r) => { resolve = r; });
+            }
+          }
+        } finally {
+          handle.stop();
+        }
       },
       filterEvents: (contractId, filters) =>
         filterContractEvents(contractId, filters, { rpcUrl }),

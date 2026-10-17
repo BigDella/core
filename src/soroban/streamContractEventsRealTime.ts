@@ -1,197 +1,157 @@
 /**
- * Real-time Soroban contract event streaming (#541).
- *
- * Polls the Soroban RPC `getEvents` endpoint using a forward cursor,
- * applying exponential backoff with jitter on transient failures and
- * hash-based deduplication so events crossing ledger/cursor boundaries are
- * never yielded twice. Backoff resets on every successful poll.
- *
- * The generator runs until the caller breaks out of the `for await` loop or
- * the provided `AbortSignal` is aborted. After `maxAttempts` consecutive
- * RPC failures the stream throws the last error; transient hiccups shorter
- * than that are absorbed by the backoff.
+ * streamContractEventsRealTime — real-time contract event streaming with
+ * automatic reconnection and exponential backoff.
  */
 
-import { rpc as SorobanRpc } from "@stellar/stellar-sdk";
-import { createSorobanServer } from "../shared/serverFactory";
-import { computeBackoffDelay } from "../shared/utils";
-import { toMessage } from "../shared/errors";
-import type { ContractEvent } from "./subscribeContractEvents";
-import { EventIndex, filterNewEvents } from "./eventIndex";
+import type { ContractEvent, ContractEventFilter } from "./subscribeContractEvents";
+import type { StreamContractEventsOptions } from "./types";
 
-export interface StreamContractEventsRealTimeOptions {
-  /** Base URL of the Soroban RPC server. */
-  rpcUrl: string;
-  /**
-   * Ledger sequence to start querying from (inclusive). When omitted, the
-   * RPC server reports the latest ledger and streaming starts from there.
-   */
-  startLedger?: number;
-  /** Maximum number of events fetched per `getEvents` call (default: 100). */
-  limit?: number;
-  /** Consecutive RPC failures before the stream stops (default: 8). */
-  maxAttempts?: number;
-  /** Initial backoff delay in milliseconds (default: 500). */
-  backoffInitialMs?: number;
-  /** Maximum backoff delay in milliseconds (default: 30_000). */
-  backoffMaxMs?: number;
-  /** Backoff growth multiplier (default: 2). */
-  backoffFactor?: number;
-  /** Whether to apply jitter to backoff delays (default: true). */
-  jitter?: boolean;
-  /** Abort signal that stops the stream cleanly. */
-  signal?: AbortSignal;
-  /**
-   * Optional callback invoked after each failed RPC attempt with the error
-   * and the zero-based consecutive-attempt counter. Useful for observability.
-   */
-  onError?: (error: unknown, attempt: number) => void;
+/** Type alias for the options accepted by {@link streamContractEventsRealTime}. */
+export type StreamContractEventsRealTimeOptions = StreamContractEventsOptions;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
-const EVENT_INDEX_DEFAULT_MAX = 10_000;
+function readEventRecord(raw: unknown): ContractEvent | null {
+  if (!isRecord(raw)) return null;
 
-/**
- * Normalize a contract address. RPC responses can surface the contract ID as a
- * plain string or as a stellar-base `Contract` instance; both normalize to a
- * string, falling back to the requested `contractId` otherwise.
- */
-function contractAddress(value: unknown, fallback: string): string {
-  if (typeof value === "string" && value.length > 0) return value;
-  if (value && typeof (value as { toString?: () => string }).toString === "function") {
-    const normalized = String((value as { toString: () => string }).toString());
-    if (normalized.length > 0) return normalized;
-  }
-  return fallback;
-}
+  const topics = Array.isArray(raw.topics)
+    ? raw.topics.filter((t): t is string => typeof t === "string")
+    : Array.isArray(raw.topic)
+      ? raw.topic.filter((t): t is string => typeof t === "string")
+      : [];
 
-function toEvent(
-  raw: SorobanRpc.Api.EventResponse,
-  contractId: string,
-): ContractEvent {
   return {
-    id: raw.id,
-    contractId: contractAddress(raw.contractId, contractId),
-    pagingToken: raw.pagingToken,
-    ledger: raw.ledger,
-    ledgerClosedAt: raw.ledgerClosedAt,
-    txHash: raw.txHash,
-    inSuccessfulContractCall: raw.inSuccessfulContractCall,
-    type: raw.type,
-    topics: raw.topic.map((topic) => topic.toXDR("base64")),
-    value: raw.value.toXDR("base64"),
-    topic: raw.topic.map((topic) => topic.toXDR("base64")),
+    ...(raw as Record<string, unknown>),
+    id: String(raw.id ?? raw.event_id ?? raw.eventId ?? ""),
+    contractId: String(raw.contractId ?? raw.contract_id ?? raw.contractID ?? ""),
+    name: String(raw.name ?? raw.event_type ?? raw.eventType ?? ""),
+    topics,
   };
 }
 
-/**
- * Stream contract events in near real-time over the Soroban RPC endpoint.
- *
- * Events are yielded in batches as new ones appear. Deduplication is
- * hash-based (see `EventIndex`), so a batch never contains an event that was
- * already yielded, even when the RPC node re-reports an earlier cursor.
- *
- * @param contractId - Soroban contract address to monitor.
- * @param options    - RPC URL, backoff tuning, filtering, and abort options.
- * @yields Arrays of new `ContractEvent` objects as they are detected.
- *
- * @example
- * const ac = new AbortController();
- * setTimeout(() => ac.abort(), 60_000);
- * for await (const events of streamContractEventsRealTime(contractId, {
- *   rpcUrl: "https://soroban-testnet.stellar.org",
- *   signal: ac.signal,
- * })) {
- *   console.log("new events:", events);
- * }
- */
-export async function* streamContractEventsRealTime(
-  contractId: string,
-  options: StreamContractEventsRealTimeOptions,
-): AsyncGenerator<ContractEvent[]> {
-  const server = createSorobanServer(options.rpcUrl);
-  if (typeof (server as SorobanRpc.Server).getEvents !== "function") {
-    throw new Error(
-      "streamContractEventsRealTime: the configured RPC server does not support getEvents().",
+function readRecords(payload: unknown): ContractEvent[] {
+  if (Array.isArray(payload)) return payload.map(readEventRecord).filter(Boolean) as ContractEvent[];
+
+  if (!isRecord(payload)) return [];
+
+  const embedded = payload._embedded;
+  const records = Array.isArray(payload.records)
+    ? payload.records
+    : isRecord(embedded) && Array.isArray(embedded.records)
+      ? embedded.records
+      : [];
+
+  return records.map(readEventRecord).filter(Boolean) as ContractEvent[];
+}
+
+function matchesFilter(event: ContractEvent, filter?: ContractEventFilter): boolean {
+  if (!filter) return true;
+
+  if (filter.name) {
+    const eventName = typeof event.name === "string" ? event.name : "";
+    if (eventName !== filter.name) return false;
+  }
+
+  if (filter.contractId) {
+    const eventContractId = typeof event.contractId === "string" ? event.contractId : "";
+    if (eventContractId !== filter.contractId) return false;
+  }
+
+  if (filter.topicPatterns?.length) {
+    const topics = Array.isArray(event.topics) ? event.topics : [];
+    const matchesTopic = topics.some((topic) =>
+      topic != null &&
+      filter.topicPatterns!.some((pattern) =>
+        pattern instanceof RegExp ? pattern.test(topic) : topic === pattern,
+      ),
     );
+    if (!matchesTopic) return false;
   }
 
-  const maxAttempts = options.maxAttempts ?? 8;
-  const limit = options.limit ?? 100;
-  const index = new EventIndex(EVENT_INDEX_DEFAULT_MAX);
+  return true;
+}
 
-  let cursor: string | undefined;
-  let consecutiveFailures = 0;
+/**
+ * Start a real-time streaming subscription to contract events.
+ *
+ * Polls the Horizon `/ledgers` endpoint on a configurable interval and emits
+ * new (deduplicated) events via `options.onEvent`. On network failure the
+ * interval doubles (capped at `maxBackoffMs`) and `options.onReconnect` is
+ * called on every retry after the first.
+ *
+ * @returns An object with a `stop()` method to cancel the subscription.
+ */
+export function streamContractEventsRealTime(
+  contractId: string,
+  filter: ContractEventFilter | undefined,
+  options: StreamContractEventsOptions,
+): { stop: () => void } {
+  const baseInterval = options.intervalMs ?? 1500;
+  const maxBackoff = options.maxBackoffMs ?? 60_000;
+  const requestFetch = options.fetch ?? fetch;
 
-  while (!options.signal?.aborted) {
+  let backoffMs = baseInterval;
+  let attempt = 0;
+  let active = true;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const seenEventIds = new Set<string>();
+
+  const scheduleNext = (): void => {
+    if (!active) return;
+    timer = setTimeout(() => {
+      void poll();
+    }, backoffMs);
+  };
+
+  const poll = async (): Promise<void> => {
+    if (!active) return;
+
     try {
-      const response = await (server as SorobanRpc.Server).getEvents({
-        filters: [{ type: "contract", contractIds: [contractId] }],
-        ...(options.startLedger !== undefined && {
-          startLedger: options.startLedger,
-        }),
-        ...(cursor !== undefined && { cursor }),
-        limit,
-      });
+      const endpoint = new URL(`${options.horizonUrl.replace(/\/$/, "")}/ledgers`);
+      endpoint.searchParams.set("order", "desc");
+      endpoint.searchParams.set("limit", "1");
 
-      // A successful poll resets the backoff counter for the next failure.
-      consecutiveFailures = 0;
-
-      const events = filterNewEvents(
-        index,
-        response.events.map((event) => toEvent(event, contractId)),
-      );
-      if (events.length > 0) {
-        yield events;
+      const response = await requestFetch(endpoint.toString());
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
 
-      if (!response.events || response.events.length === 0) {
-        // No new events: re-request from the same cursor. The RPC cursor is
-        // only advanced when new events are returned.
-        continue;
-      }
+      const payload = await response.json();
+      const events = readRecords(payload)
+        .filter((event) => {
+          const eventContractId = typeof event.contractId === "string" ? event.contractId : "";
+          return eventContractId === contractId;
+        })
+        .filter((event) => matchesFilter(event, filter));
 
-      cursor = response.cursor;
-    } catch (error) {
-      consecutiveFailures += 1;
-      options.onError?.(error, consecutiveFailures - 1);
-
-      if (consecutiveFailures >= maxAttempts) {
-        const terminal = new Error(
-          `streamContractEventsRealTime: stopped after ${consecutiveFailures} consecutive RPC failures: ${toMessage(error)}`,
-        );
-        (terminal as { cause?: unknown }).cause = error;
-        throw terminal;
-      }
-
-      const delay = computeBackoffDelay(consecutiveFailures - 1, {
-        ...(options.backoffInitialMs !== undefined && {
-          initialDelayMs: options.backoffInitialMs,
-        }),
-        ...(options.backoffMaxMs !== undefined && {
-          maxDelayMs: options.backoffMaxMs,
-        }),
-        ...(options.backoffFactor !== undefined && {
-          factor: options.backoffFactor,
-        }),
-        ...(options.jitter !== undefined && { jitter: options.jitter }),
+      const newEvents = events.filter((event) => {
+        const id = String(event.id ?? `${event.contractId ?? ""}:${event.name ?? ""}`);
+        if (!id || seenEventIds.has(id)) return false;
+        seenEventIds.add(id);
+        return true;
       });
-      await new Promise<void>((resolve) => {
-        const timer = setTimeout(() => {
-          options.signal?.removeEventListener("abort", onAbort);
-          resolve();
-        }, delay);
-        const onAbort = (): void => {
-          clearTimeout(timer);
-          resolve();
-        };
-        if (options.signal?.aborted) {
-          clearTimeout(timer);
-          resolve();
-          return;
-        }
-        options.signal?.addEventListener("abort", onAbort, { once: true });
-      });
+
+      // Success — reset backoff
+      backoffMs = baseInterval;
+      attempt = 0;
+
+      if (newEvents.length > 0) {
+        options.onEvent(newEvents);
+      }
+    } catch (caught) {
+      const error = caught instanceof Error ? caught : new Error(String(caught));
+      options.onError?.(error, attempt);
+      if (attempt > 0) {
+        options.onReconnect?.(attempt);
+      }
+      attempt++;
+      backoffMs = Math.min(backoffMs * 2, maxBackoff);
     }
-  }
-  // EventIndex is GC'd with the generator scope; nothing retained (#707).
+
+    scheduleNext();
+  };
+  scheduleNext();
+  return { stop: () => { active = false; clearTimeout(timer); } };
 }

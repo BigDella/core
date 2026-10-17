@@ -265,10 +265,6 @@ export type {
   PathPaymentParams,
   PathPaymentMode,
   AtomicSwapParams,
-  ManageOfferParams,
-  ClawbackParams,
-  LiquidityPoolDepositParams,
-  LiquidityPoolWithdrawParams,
 } from "./types";
 export type {
   ClaimPredicateType,
@@ -391,6 +387,27 @@ export type {
   DestinationValidationResult,
   ValidateDestinationOptions,
 } from "./validateDestination";
+export {
+  submitBatch,
+  wasAtomicExecuted,
+  suggestRetryStrategy,
+  generateRollbackInstructions,
+} from "./batchSubmitter";
+export type {
+  BatchSubmissionResult,
+  BatchTransactionStatus,
+  BatchSubmissionOptions,
+  TransactionBatchStatus,
+} from "./batchSubmitter";
+export {
+  buildTimeLockTransaction,
+  validateTimeBounds,
+  getTimeLockedTransactionStatus,
+} from "./timeLocks";
+export type {
+  TimeBounds,
+  TimeLockExecutionStatus,
+} from "./timeLocks";
 
 // ─── Webhook support (#208, #395) ─────────────────────────────────────────────
 export {
@@ -716,46 +733,6 @@ export type {
   SigningRequest,
   SigningStatus,
 } from "./signingCoordinator";
-
-// ─── Time-locked transaction scheduling (#587) ────────────────────────────────
-export {
-  buildTimeLockTransaction,
-  getTimeLockedTransactionStatus,
-  validateTimeBounds,
-} from "./timeLocks";
-export type {
-  TimeBounds,
-  TimeLockExecutionStatus,
-} from "./timeLocks";
-
-// ─── Transaction cost forecasting (#588) ──────────────────────────────────────
-export {
-  forecastTransactionCost,
-  compareCosts,
-  suggestOptimization,
-  analyzeBatchCost,
-} from "./costForecasting";
-export type {
-  CostForecast as TransactionCostForecast,
-  CostComparison,
-  OptimizationSuggestion,
-} from "./costForecasting";
-
-// ─── Batch transaction submission (#589) ──────────────────────────────────────
-export {
-  submitBatch,
-  getTransactionStatus as getBatchTransactionStatus,
-  generateRollbackInstructions,
-  wasAtomicExecuted,
-  suggestRetryStrategy,
-} from "./batchSubmitter";
-export type {
-  TransactionBatchStatus,
-  BatchTransactionStatus,
-  BatchSubmissionOptions,
-  BatchSubmissionResult,
-} from "./batchSubmitter";
-
 // ─── Transaction simulation and safe execution preview (#612) ─────────────────
 export { previewTransaction } from "./simulationPreview";
 export type {

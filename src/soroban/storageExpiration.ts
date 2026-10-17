@@ -1,337 +1,178 @@
-/**
- * Storage expiration tracking and renewal utilities for Soroban contracts.
- *
- * Inspects contract entries for their remaining lifetime, calculates renewal
- * requirements, and generates renewal operations when storage approaches
- * its expiration threshold.
- */
-
-import { err, ok } from "../shared/response";
+import {
+  rpc as SorobanRpc,
+  Operation,
+  TransactionBuilder,
+  Horizon,
+  BASE_FEE,
+  xdr,
+  Address,
+} from "@stellar/stellar-sdk";
+import { ok, err, SorokitErrorCode } from "../shared/response";
 import type { SorokitResult } from "../shared/response";
-import { SorokitErrorCategory, SorokitErrorCode } from "../shared/response";
+import { isNetworkConnectivityError, isNotFoundError, toMessage } from "../shared";
+import { DEFAULT_TX_TIMEOUT_SECONDS } from "../shared/constants";
+import type { StorageEntry, StorageRentResult, RenewContractStorageResult } from "./types";
 
-/**
- * Storage rent estimation result.
- */
-export interface StorageRentEstimate {
-  /** Contract ID being analyzed */
-  contractId: string;
-  /** Estimated renewal cost in stroops */
-  estimatedRenewalCost: string;
-  /** Current ledger sequence of the estimate */
-  ledgerSequence: number;
-  /** List of entries approaching expiration */
-  entriesNearExpiry: StorageEntryExpiration[];
-  /** Total entries in contract storage */
-  totalEntries: number;
-  /** Timestamp of the estimation */
-  estimatedAt: number;
+export interface CalculateStorageRentOptions {
+  rpcUrl: string;
+  networkPassphrase: string;
+}
+
+export interface RenewContractStorageOptions {
+  rpcUrl: string;
+  networkPassphrase: string;
+  horizonUrl: string;
+  publicKey: string;
 }
 
 /**
- * Storage entry expiration details.
- */
-export interface StorageEntryExpiration {
-  /** Unique key identifier */
-  key: string;
-  /** Durability type: temporary or persistent */
-  durability: "temporary" | "persistent";
-  /** Current TTL (time to live) in seconds */
-  currentTtl: number;
-  /** Ledger sequence when this entry expires */
-  expirationLedger: number;
-  /** Estimated renewal cost in stroops */
-  renewalCost: string;
-  /** Whether entry is actively nearing expiration threshold */
-  nearExpiry: boolean;
-}
-
-/**
- * Options for storage renewal operations.
- */
-export interface StorageRenewalOptions {
-  /** Warning threshold: entries expiring within this many seconds are flagged */
-  warningThresholdSeconds?: number;
-  /** Auto-renewal enabled: automatically include all near-expiry entries */
-  autoRenewal?: boolean;
-  /** Specific entry keys to renew (overrides auto-renewal selection) */
-  specificKeys?: string[];
-}
-
-/**
- * Renewal operation result.
- */
-export interface StorageRenewalOperation {
-  /** Contract ID being renewed */
-  contractId: string;
-  /** List of entry keys included in renewal */
-  entryKeys: string[];
-  /** Total estimated renewal cost */
-  totalCost: string;
-  /** Renewal operation XDR (base64 encoded) */
-  operationXdr: string;
-  /** Suggested sequence number for this operation */
-  suggestedSequence: string;
-}
-
-/**
- * Configuration for storage expiration tracking.
- */
-export interface StorageExpirationConfig {
-  /** Default warning threshold in seconds (default: 2592000 = 30 days) */
-  warningThresholdSeconds: number;
-  /** Enable auto-renewal by default */
-  autoRenewalEnabled: boolean;
-}
-
-// Default configuration
-const DEFAULT_CONFIG: StorageExpirationConfig = {
-  warningThresholdSeconds: 2592000, // 30 days
-  autoRenewalEnabled: false,
-};
-
-/**
- * Calculate storage rent and renewal requirements for a contract.
+ * Fetch real TTL data for one or more contract persistent-instance storage entries
+ * via a single batched getLedgerEntries RPC call.
  *
- * Inspects all storage entries in the contract, evaluates their TTL,
- * and estimates the cost to renew entries approaching their expiration
- * threshold.
- *
- * @param contractId - The contract ID to analyze
- * @param options - Storage renewal options (optional)
- * @returns Estimation result or error
- *
- * @example
- * const result = await calculateStorageRent("CAAAAAAA...", {
- *   warningThresholdSeconds: 1209600, // 14 days
- * });
- *
- * if (result.status === "ok") {
- *   console.log("Renewal cost:", result.data.estimatedRenewalCost);
- * }
+ * Returns a StorageRentResult containing the live ledger sequence and per-entry TTL info.
  */
 export async function calculateStorageRent(
-  contractId: string,
-  options?: StorageRenewalOptions,
-): Promise<SorokitResult<StorageRentEstimate>> {
+  contractIds: string[],
+  options: CalculateStorageRentOptions,
+): Promise<SorokitResult<StorageRentResult>> {
+  if (!Array.isArray(contractIds) || contractIds.length === 0) {
+    return err(
+      SorokitErrorCode.TX_BUILD_FAILED,
+      "calculateStorageRent requires at least one contractId.",
+    );
+  }
+
+  let keys: xdr.LedgerKey[];
   try {
-    // Validate contract ID format
-    if (
-      !contractId ||
-      typeof contractId !== "string" ||
-      !contractId.startsWith("C")
-    ) {
-      return err(
-        SorokitErrorCode.INVALID_ADDRESS,
-        "Invalid contract ID format",
-        undefined,
-        undefined,
-        {
-          context: {
-            operation: "calculateStorageRent",
-            parameters: { contractId },
-          },
-        },
+    keys = contractIds.map((contractId) => {
+      const address = Address.fromString(contractId);
+      return xdr.LedgerKey.contractData(
+        new xdr.LedgerKeyContractData({
+          contract: address.toScAddress(),
+          key: xdr.ScVal.scvLedgerKeyContractInstance(),
+          durability: xdr.ContractDataDurability.persistent(),
+        }),
       );
+    });
+  } catch (cause) {
+    return err(
+      SorokitErrorCode.TX_BUILD_FAILED,
+      `Failed to build ledger keys for contract IDs: ${toMessage(cause)}`,
+      cause,
+    );
+  }
+
+  try {
+    const rpc = new SorobanRpc.Server(options.rpcUrl);
+    const response = await rpc.getLedgerEntries(...keys);
+    const latestLedger: number = response.latestLedger;
+
+    // Build a map from key XDR to liveUntilLedgerSeq for fast lookup
+    const ttlByKeyXdr = new Map<string, number>();
+    for (const entry of response.entries) {
+      if (entry.liveUntilLedgerSeq !== undefined) {
+        const keyBase64 = entry.key.toXDR("base64");
+        ttlByKeyXdr.set(keyBase64, entry.liveUntilLedgerSeq);
+      }
     }
 
-    const config = DEFAULT_CONFIG;
-    const warningThreshold =
-      options?.warningThresholdSeconds ?? config.warningThresholdSeconds;
+    const entries: StorageEntry[] = keys.map((key, index) => {
+      const keyXdr = key.toXDR("base64");
+      const liveUntilLedgerSeq = ttlByKeyXdr.get(keyXdr) ?? 0;
+      const remainingLedgers = Math.max(0, liveUntilLedgerSeq - latestLedger);
+      const estimatedRenewalCostStroops =
+        remainingLedgers <= 0 ? 0 : Math.ceil(remainingLedgers / 1000) * 10000;
 
-    // Mock implementation: In production, this would query the RPC to get actual storage entries
-    // and their TTL values from the network
-    const mockEntries: StorageEntryExpiration[] = [
-      {
-        key: "entry_001",
-        durability: "persistent",
-        currentTtl: 1814400, // 21 days
-        expirationLedger: 50000,
-        renewalCost: "1000000",
-        nearExpiry: false,
-      },
-      {
-        key: "entry_002",
-        durability: "persistent",
-        currentTtl: 1209600, // 14 days
-        expirationLedger: 40000,
-        renewalCost: "800000",
-        nearExpiry: true,
-      },
-    ];
-
-    const entriesNearExpiry = mockEntries.filter(
-      (entry) => entry.currentTtl < warningThreshold,
-    );
-
-    const estimatedRenewalCost = entriesNearExpiry
-      .reduce((sum, entry) => sum + BigInt(entry.renewalCost), BigInt(0))
-      .toString();
-
-    return ok({
-      contractId,
-      estimatedRenewalCost,
-      ledgerSequence: 45000,
-      entriesNearExpiry,
-      totalEntries: mockEntries.length,
-      estimatedAt: Date.now(),
+      return {
+        // contractIds.length === keys.length, so index is always in-bounds
+        contractId: contractIds[index] as string,
+        keyXdr,
+        liveUntilLedgerSeq,
+        remainingLedgers,
+        estimatedRenewalCostStroops,
+      };
     });
-  } catch (error) {
+
+    return ok({ ledgerSequence: latestLedger, entries });
+  } catch (cause) {
+    if (isNetworkConnectivityError(cause)) {
+      return err(
+        SorokitErrorCode.NETWORK_ERROR,
+        `Failed to fetch ledger entries due to network connectivity: ${toMessage(cause)}`,
+        cause,
+      );
+    }
     return err(
-      SorokitErrorCode.CONTRACT_READ_FAILED,
-      "Failed to calculate storage rent",
-      error,
-      undefined,
-      {
-        context: {
-          operation: "calculateStorageRent",
-          parameters: { contractId },
-        },
-      },
+      SorokitErrorCode.NETWORK_ERROR,
+      `Failed to fetch ledger entries: ${toMessage(cause)}`,
+      cause,
     );
   }
 }
 
 /**
- * Build a storage renewal operation for a contract.
+ * Build a valid ExtendFootprintTTL transaction XDR for the given contract.
  *
- * Constructs the necessary renewal transaction based on entries
- * selected via options (auto-renewal, specific keys, or near-expiry).
- * The returned operation can be integrated into a transaction envelope.
+ * @param contractId - The contract whose persistent instance entry TTL should be extended.
+ * @param extendByLedgers - The minimum TTL delta in ledgers from the last closed ledger (LCL).
+ *   This is a **relative** value — the number of ledgers past the current ledger for which the
+ *   entry must remain live. It is passed directly to the SDK's `extendTo` field in
+ *   `Operation.extendFootprintTtl`. Pass the desired TTL duration, e.g. 100_000 for ~5 days
+ *   on Testnet. Do NOT pass an absolute ledger sequence number here.
+ * @param options - RPC, Horizon, network and account options.
  *
- * @param contractId - The contract ID to renew
- * @param options - Renewal options (optional)
- * @returns Renewal operation or error
- *
- * @example
- * const result = await renewContractStorage(contractId, {
- *   autoRenewal: true,
- *   warningThresholdSeconds: 1209600,
- * });
- *
- * if (result.status === "ok") {
- *   // Integrate result.data.operationXdr into transaction
- * }
+ * Returns a Base64-encoded TransactionEnvelope that can be decoded by
+ * TransactionBuilder.fromXDR(xdr, networkPassphrase) without error.
+ * The caller must sign and submit the transaction separately.
  */
 export async function renewContractStorage(
   contractId: string,
-  options?: StorageRenewalOptions,
-): Promise<SorokitResult<StorageRenewalOperation>> {
+  extendByLedgers: number,
+  options: RenewContractStorageOptions,
+): Promise<SorokitResult<RenewContractStorageResult>> {
+  let sourceAccount: { sequence: string; accountId: () => string };
+
   try {
-    // Validate contract ID
-    if (
-      !contractId ||
-      typeof contractId !== "string" ||
-      !contractId.startsWith("C")
-    ) {
+    const horizonServer = new Horizon.Server(options.horizonUrl);
+    sourceAccount = await horizonServer.loadAccount(options.publicKey);
+  } catch (cause) {
+    if (isNotFoundError(cause)) {
       return err(
-        SorokitErrorCode.INVALID_ADDRESS,
-        "Invalid contract ID for renewal",
-        undefined,
-        undefined,
-        {
-          context: {
-            operation: "renewContractStorage",
-            parameters: { contractId },
-          },
-        },
+        SorokitErrorCode.ACCOUNT_NOT_FOUND,
+        `Account not found on the network: ${options.publicKey}`,
+        cause,
       );
     }
-
-    // First, get current storage state
-    const rentResult = await calculateStorageRent(contractId, options);
-    if (rentResult.status === "error") {
-      return err(
-        rentResult.error.code,
-        "Failed to assess storage before renewal",
-        rentResult.error.cause,
-        undefined,
-        {
-          context: {
-            operation: "renewContractStorage",
-            parameters: { contractId, options },
-          },
-        },
-      );
-    }
-
-    const estimate = rentResult.data;
-    let entryKeysToRenew: string[];
-
-    if (options?.specificKeys && options.specificKeys.length > 0) {
-      // Use specific keys provided
-      entryKeysToRenew = options.specificKeys;
-    } else if (options?.autoRenewal) {
-      // Use all entries near expiry
-      entryKeysToRenew = estimate.entriesNearExpiry.map((e) => e.key);
-    } else {
-      // Default: renew entries near expiry
-      entryKeysToRenew = estimate.entriesNearExpiry.map((e) => e.key);
-    }
-
-    if (entryKeysToRenew.length === 0) {
-      return err(
-        SorokitErrorCode.INVALID_CONFIG,
-        "No entries to renew",
-        undefined,
-        undefined,
-        {
-          context: {
-            operation: "renewContractStorage",
-            parameters: { contractId, options },
-          },
-        },
-      );
-    }
-
-    // Mock operation XDR - in production this would be generated from Soroban
-    const operationXdr = Buffer.from(
-      JSON.stringify({ contractId, entries: entryKeysToRenew }),
-    ).toString("base64");
-
-    return ok({
-      contractId,
-      entryKeys: entryKeysToRenew,
-      totalCost: estimate.estimatedRenewalCost,
-      operationXdr,
-      suggestedSequence: "1",
-    });
-  } catch (error) {
     return err(
-      SorokitErrorCode.CONTRACT_INVOKE_FAILED,
-      "Failed to build renewal operation",
-      error,
-      undefined,
-      {
-        context: {
-          operation: "renewContractStorage",
-          parameters: { contractId, options },
-        },
-      },
+      SorokitErrorCode.ACCOUNT_FETCH_FAILED,
+      `Failed to load account ${options.publicKey}: ${toMessage(cause)}`,
+      cause,
     );
   }
-}
 
-/**
- * Batch operation to renew storage for multiple contracts.
- *
- * Evaluates multiple contracts and returns renewal operations for each,
- * grouped by priority based on expiration urgency.
- *
- * @param contractIds - Array of contract IDs to analyze
- * @param options - Renewal options for all contracts
- * @returns Map of contract ID to renewal operation or error
- */
-export async function renewMultipleContractStorage(
-  contractIds: string[],
-  options?: StorageRenewalOptions,
-): Promise<Map<string, SorokitResult<StorageRenewalOperation>>> {
-  const results = new Map<string, SorokitResult<StorageRenewalOperation>>();
+  try {
+    // Capture sequence before TransactionBuilder.build() increments it
+    const suggestedSequence = String(sourceAccount.sequence);
 
-  for (const contractId of contractIds) {
-    const result = await renewContractStorage(contractId, options);
-    results.set(contractId, result);
+    const tx = new TransactionBuilder(sourceAccount as any, {
+      fee: BASE_FEE,
+      networkPassphrase: options.networkPassphrase,
+    })
+      .addOperation(Operation.extendFootprintTtl({ extendTo: extendByLedgers }))
+      .setTimeout(DEFAULT_TX_TIMEOUT_SECONDS)
+      .build();
+
+    const operationXdr = tx.toEnvelope().toXDR().toString("base64");
+
+    return ok({
+      operationXdr,
+      suggestedSequence,
+    });
+  } catch (cause) {
+    return err(
+      SorokitErrorCode.TX_BUILD_FAILED,
+      `Failed to build ExtendFootprintTTL transaction: ${toMessage(cause)}`,
+      cause,
+    );
   }
-
-  return results;
 }

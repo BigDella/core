@@ -2,6 +2,7 @@
  * Soroban module public types.
  */
 import type { xdr } from "@stellar/stellar-sdk";
+import type { ContractEvent } from "./subscribeContractEvents";
 import type { ContractStateTracker } from "./contractStateTracker";
 export type { ContractStateTracker };
 import {
@@ -234,4 +235,65 @@ export type ContractResultType =
 export interface ParsedContractResult {
   type: string;
   value: unknown;
+}
+
+export interface DecodedContractEvent {
+  contractId: string;
+  name: string;
+  topics: string[];
+  value: unknown;
+  raw: unknown;
+  type: string;
+}
+
+export interface StreamContractEventsOptions {
+  horizonUrl: string;
+  intervalMs?: number;
+  maxBackoffMs?: number;
+  fetch?: typeof fetch;
+  onEvent: (events: ContractEvent[]) => void;
+  onError?: (err: Error, attempt: number) => void;
+  onReconnect?: (attempt: number) => void;
+}
+
+export interface EventIndexFilter {
+  contractId?: string;
+  name?: string;
+  topics?: string[];
+  minLedger?: number;
+  maxLedger?: number;
+  predicate?: (event: ContractEvent) => boolean;
+}
+
+/** A single contract storage entry returned by calculateStorageRent */
+export interface StorageEntry {
+  contractId: string;
+  /** xdr.LedgerKey serialised to base64 for the caller's reference */
+  keyXdr: string;
+  /** Ledger sequence after which the entry expires (from liveUntilLedgerSeq) */
+  liveUntilLedgerSeq: number;
+  /** Ledger sequences remaining until expiry (liveUntilLedgerSeq - latestLedger) */
+  remainingLedgers: number;
+  /**
+   * Rough cost estimate in stroops derived from remaining TTL.
+   * Formula: ceil(remainingLedgers / 1000) * 10000 stroops.
+   * Returns 0 when the entry is already expired or not found.
+   * @remarks This is an estimate only — actual renewal cost depends on simulation.
+   */
+  estimatedRenewalCostStroops: number;
+}
+
+/** Aggregated result from calculateStorageRent */
+export interface StorageRentResult {
+  /** Ledger sequence returned by the RPC node at the time of the call */
+  ledgerSequence: number;
+  entries: StorageEntry[];
+}
+
+/** Result from renewContractStorage */
+export interface RenewContractStorageResult {
+  /** Base64-encoded TransactionEnvelope XDR containing ExtendFootprintTTL */
+  operationXdr: string;
+  /** Current account sequence number used as the transaction source */
+  suggestedSequence: string;
 }

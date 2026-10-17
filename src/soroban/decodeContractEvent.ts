@@ -1,85 +1,122 @@
-import type { ContractEvent } from "./subscribeContractEvents";
+/**
+ * decodeContractEvent — decode a raw (unknown-shape) contract event record
+ * into a typed DecodedContractEvent, optionally guided by an ABI.
+ */
 
-export interface DecodedContractEvent<TType extends string = string, TData = unknown> {
-  type: TType;
-  contractId: string;
-  data: TData;
-  raw: ContractEvent;
+import { ok, err, SorokitErrorCode } from "../shared/response";
+import type { SorokitResult } from "../shared/response";
+import { decodeContractValue } from "./contractEncoding";
+import type { DecodedContractEvent, ContractAbi, ContractAbiObject, ContractAbiFunctionObject } from "./types";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
-export type ContractEventDecoder<T extends DecodedContractEvent = DecodedContractEvent> = (
-  event: ContractEvent,
-) => T | null;
-
-export interface PairCreatedEvent {
-  tokenA: string;
-  tokenB: string;
-  pair: string;
+/** Duck-type guard — checks for an xdr.ScVal-like object with a `.switch()` method */
+function isScValLike(value: unknown): value is { switch: () => unknown } {
+  return isRecord(value) && typeof (value as Record<string, unknown>).switch === "function";
 }
 
-export interface SwapEvent {
-  sender: string;
-  path: string[];
-  amountIn: string;
-  amountOut: string;
-}
-
-function eventName(event: ContractEvent): string {
-  const topics = event.topics ?? event.topic ?? [];
-  return String(event.name || topics.at(-1) || "").toLowerCase();
-}
-
-function values(event: ContractEvent): unknown[] {
-  return Array.isArray(event.value) ? event.value : [event.value];
-}
-
-export const decodeFactoryEvent: ContractEventDecoder = (event) => {
-  const name = eventName(event);
-  const data = values(event);
-  if (!["pair_created", "paircreated", "created"].includes(name)) return null;
-  if (data.length < 3) return null;
-  return {
-    type: "factory.pair_created",
-    contractId: String(event.contractId ?? event.contract_id ?? ""),
-    data: {
-      tokenA: String(data[0]),
-      tokenB: String(data[1]),
-      pair: String(data[2]),
-    } satisfies PairCreatedEvent,
-    raw: event,
-  };
-};
-
-export const decodeRouterEvent: ContractEventDecoder = (event) => {
-  const name = eventName(event);
-  const data = values(event);
-  if (!["swap", "swapped", "swap_executed"].includes(name)) return null;
-  if (data.length < 4 || !Array.isArray(data[1])) return null;
-  return {
-    type: "router.swap",
-    contractId: String(event.contractId ?? event.contract_id ?? ""),
-    data: {
-      sender: String(data[0]),
-      path: data[1].map(String),
-      amountIn: String(data[2]),
-      amountOut: String(data[3]),
-    } satisfies SwapEvent,
-    raw: event,
-  };
-};
-
-const builtInDecoders: readonly ContractEventDecoder[] = [
-  decodeFactoryEvent,
-  decodeRouterEvent,
-];
-
-export function decodeContractEvent(
-  event: ContractEvent,
-  additionalDecoders: readonly ContractEventDecoder[] = [],
-): DecodedContractEvent | null {
-  for (const decoder of [...additionalDecoders, ...builtInDecoders]) {
-    const decoded = decoder(event);
-    if (decoded) return decoded;
+function hasMethod(abi: ContractAbi, name: string): boolean {
+  if (Array.isArray(abi)) {
+    // xdr.ScSpecFunctionV0[] — each entry has a name() method
+    return abi.some((fn) => {
+      try {
+        return (fn as any).name?.().toString() === name;
+      } catch {
+        return false;
+      }
+    });
   }
-  return null;
+
+  if (isRecord(abi)) {
+    if ("methods" in abi) {
+      return (abi as ContractAbiObject).methods.some((m) => m.name === name);
+    }
+    if ("functions" in abi) {
+      return (abi as ContractAbiFunctionObject).functions.some((m) => m.name === name);
+    }
+    // ContractAbiSpec — has funcs() method
+    if (typeof (abi as Record<string, unknown>).funcs === "function") {
+      try {
+        const funcs = (abi as any).funcs() as unknown[];
+        return funcs.some((fn) => {
+          try {
+            return (fn as any).name?.().toString() === name;
+          } catch {
+            return false;
+          }
+        });
+      } catch {
+        return false;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Decode a raw contract event object into a `DecodedContractEvent`.
+ *
+ * - If `abi` is provided and the event name is found in the ABI the event is
+ *   classified as `type: 'known'`; otherwise `type: 'unknown'`.
+ * - The `value` field is decoded via `decodeContractValue` when the raw value
+ *   looks like an xdr.ScVal (duck-type check on `.switch()`).
+ *
+ * Returns `err(CONTRACT_READ_FAILED, ...)` for malformed input or decode errors.
+ */
+export function decodeContractEvent(
+  rawEvent: unknown,
+  abi?: ContractAbi,
+): SorokitResult<DecodedContractEvent> {
+  if (!isRecord(rawEvent) || Array.isArray(rawEvent)) {
+    return err(
+      SorokitErrorCode.CONTRACT_READ_FAILED,
+      "malformed event: expected an object",
+    );
+  }
+
+  try {
+    const contractId = String(rawEvent.contractId ?? rawEvent.contract_id ?? "");
+    const name = String(rawEvent.name ?? rawEvent.event_type ?? "");
+
+    const rawTopics = rawEvent.topics;
+    const topics: string[] = Array.isArray(rawTopics)
+      ? rawTopics
+          .filter((t): t is string | number | boolean => t != null)
+          .map(String)
+      : [];
+
+    const rawValue = rawEvent.value;
+
+    // Determine type and attempt decoding
+    let eventType: string;
+    let decodedValue: unknown;
+
+    if (abi !== undefined) {
+      eventType = hasMethod(abi, name) ? "known" : "unknown";
+    } else {
+      eventType = "unknown";
+    }
+
+    if (isScValLike(rawValue)) {
+      // Pass through to decodeContractValue — it expects an xdr.ScVal
+      decodedValue = decodeContractValue(rawValue as any);
+    } else {
+      decodedValue = rawValue;
+    }
+
+    return ok<DecodedContractEvent>({
+      contractId,
+      name,
+      topics,
+      value: decodedValue,
+      raw: rawEvent,
+      type: eventType,
+    });
+  } catch (caught) {
+    const message = caught instanceof Error ? caught.message : String(caught);
+    return err(SorokitErrorCode.CONTRACT_READ_FAILED, message, caught);
+  }
 }

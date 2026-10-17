@@ -587,7 +587,6 @@ export {
 export type { TrustlineState } from "./transaction/index";
 export { compareFeeAcrossNetworks } from "./transaction/index";
 export type { NetworkFeeResult } from "./transaction/index";
-export { compose } from "./transaction/compose";
 export type {
   TransactionPage,
   TransactionStreamConfig,
@@ -858,12 +857,8 @@ export { setSorobanSimulator } from "./shared/serverFactory";
 
 // ─── Soroban real-time event streaming (#541) ──────────────────────────────────
 export { streamContractEventsRealTime } from "./soroban/streamContractEventsRealTime";
-export type { StreamContractEventsRealTimeOptions } from "./soroban/streamContractEventsRealTime";
 export {
   EventIndex,
-  filterNewEvents,
-  hashEvent,
-  hashString,
 } from "./soroban/eventIndex";
 
 // ─── Soroban types ────────────────────────────────────────────────────────────
@@ -1041,14 +1036,6 @@ export type {
 } from "./soroban/validateDeployConfig";
 export {
   decodeContractEvent,
-  decodeFactoryEvent,
-  decodeRouterEvent,
-} from "./soroban/decodeContractEvent";
-export type {
-  ContractEventDecoder,
-  DecodedContractEvent,
-  PairCreatedEvent,
-  SwapEvent,
 } from "./soroban/decodeContractEvent";
 export { getFactoryStatistics } from "./soroban/factoryStatistics";
 export type {
@@ -1154,14 +1141,6 @@ export type {
 export {
   calculateStorageRent,
   renewContractStorage,
-  renewMultipleContractStorage,
-} from "./soroban/storageExpiration";
-export type {
-  StorageRentEstimate,
-  StorageEntryExpiration,
-  StorageRenewalOptions,
-  StorageRenewalOperation,
-  StorageExpirationConfig,
 } from "./soroban/storageExpiration";
 
 // ─── Response system ──────────────────────────────────────────────────────────
